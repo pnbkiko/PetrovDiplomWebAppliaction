@@ -1,0 +1,143 @@
+<!-- src/main/resources/templates/machines.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оборудование | Система ТО</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="machines">
+<div class="container">
+    <div class="sidebar">
+        <h2><i class="fas fa-cogs"></i> Управление ТО</h2>
+        <ul class="nav-menu">
+            <li><a href="/"><i class="fas fa-home"></i> Главная</a></li>
+            <li><a class="active" href="/machines"><i class="fas fa-industry"></i> Оборудование</a></li>
+            <li><a href="/maintenance-types"><i class="fas fa-tools"></i> Виды ТО</a></li>
+            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
+            <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
+            <li><a href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <h1><i class="fas fa-industry"></i> Управление оборудованием</h1>
+        </header>
+
+        <div class="content">
+            <!-- Форма добавления -->
+            <div class="card">
+                <h2><i class="fas fa-plus-circle"></i> Добавить оборудование</h2>
+                <form th:action="@{/machines/add}" th:object="${machine}" method="post">
+                    <div class="form-group">
+                        <label>Модель оборудования</label>
+                        <input type="text" th:field="*{model}" placeholder="Например: Токарный станок ЧПУ-500" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Инвентарный номер</label>
+                        <input type="text" th:field="*{invNumber}" placeholder="Например: INV-2023-001" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Дата ввода в эксплуатацию</label>
+                        <input type="date" th:field="*{commissionedAt}" required>
+                    </div>
+                    <button type="submit" class="btn">
+                        <i class="fas fa-save"></i> Сохранить
+                    </button>
+                </form>
+            </div>
+
+            <!-- Список оборудования -->
+            <div class="card">
+                <h2><i class="fas fa-list"></i> Список оборудования</h2>
+
+                <div th:if="${machines.empty}" style="text-align: center; padding: 40px; color: #666;">
+                    <i class="fas fa-industry fa-3x" style="margin-bottom: 15px; opacity: 0.3;"></i>
+                    <p>Оборудование не найдено</p>
+                </div>
+
+                <table th:unless="${machines.empty}" class="data-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Модель</th>
+                        <th>Инвентарный номер</th>
+                        <th>Дата ввода</th>
+                        <th>Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="machine : ${machines}">
+                        <td th:text="${machine.id}"></td>
+                        <td th:text="${machine.model}"></td>
+                        <td><code style="background: #f1f3f4; padding: 3px 6px; border-radius: 3px;"
+                                  th:text="${machine.invNumber}"></code></td>
+                        <td th:text="${machine.commissionedAt}"></td>
+                        <td>
+                            <form th:action="@{/machines/delete/{id}(id=${machine.id})}"
+                                  method="post"
+                                  onsubmit="return confirm('Удалить оборудование?')"
+                                  style="display: inline;">
+                                <button type="submit" class="btn-delete-sm">
+                                    <i class="fas fa-trash-alt"></i> Удалить
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function() {
+        // Автозаполнение текущей даты в инпутах
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+        dateInputs.forEach(input => {
+            if (!input.value) {
+                const today = new Date().toISOString().split('T')[0];
+                input.value = today;
+            }
+        });
+
+        // Подтверждение удаления
+        const deleteForms = document.querySelectorAll('form[onsubmit]');
+        deleteForms.forEach(form => {
+            const originalOnsubmit = form.onsubmit;
+            form.onsubmit = null;
+            form.addEventListener('submit', function(e) {
+                if (!confirm('Вы уверены, что хотите удалить эту запись?')) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Показываем загрузку на кнопке
+                const btn = this.querySelector('button[type="submit"]');
+                if (btn) {
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Удаление...';
+                    btn.disabled = true;
+
+                    // Восстанавливаем кнопку через 3 секунды на всякий случай
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                        btn.disabled = false;
+                    }, 3000);
+                }
+
+                if (originalOnsubmit) {
+                    return originalOnsubmit.call(this, e);
+                }
+            });
+        });
+    });
+    /*]]>*/
+</script>
+</body>
+</html>

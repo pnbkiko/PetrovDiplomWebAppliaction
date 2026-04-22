@@ -1,0 +1,956 @@
+<!-- src/main/resources/templates/index.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель управления ТО | Система ТО</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Дополнительные стили для главной страницы */
+        .dashboard {
+            padding: 20px;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            opacity: 0.3;
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .welcome-content p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        /* Статистика */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+        }
+
+        .stat-card.overdue::before {
+            background: linear-gradient(180deg, #e74c3c, #c0392b);
+        }
+
+        .stat-card.machines::before {
+            background: linear-gradient(180deg, #3498db, #2980b9);
+        }
+
+        .stat-card.types::before {
+            background: linear-gradient(180deg, #9b59b6, #8e44ad);
+        }
+
+        .stat-card.schedule::before {
+            background: linear-gradient(180deg, #2ecc71, #27ae60);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-card.overdue .stat-icon {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+
+        .stat-card.machines .stat-icon {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+        }
+
+        .stat-card.types .stat-icon {
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        }
+
+        .stat-card.schedule .stat-icon {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 5px 0;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-change.positive {
+            color: #27ae60;
+        }
+
+        .stat-change.negative {
+            color: #e74c3c;
+        }
+
+        /* Быстрые действия */
+        .quick-actions {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .quick-actions h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .action-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .action-card:hover {
+            background: white;
+            border-color: #3498db;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.2);
+        }
+
+        .action-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .action-card:nth-child(1) .action-icon {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+        }
+
+        .action-card:nth-child(2) .action-icon {
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        }
+
+        .action-card:nth-child(3) .action-icon {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+        }
+
+        .action-card:nth-child(4) .action-icon {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+
+        .action-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .action-desc {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+
+        /* Предстоящие ТО */
+        .upcoming-section {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .section-header h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .view-all {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .view-all:hover {
+            color: #2980b9;
+            gap: 8px;
+        }
+
+        .upcoming-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .upcoming-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #3498db;
+            transition: all 0.2s;
+        }
+
+        .upcoming-item:hover {
+            background: #e8f4ff;
+            transform: translateX(5px);
+        }
+
+        .upcoming-date {
+            min-width: 80px;
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            margin-right: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .date-day {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+            line-height: 1;
+        }
+
+        .date-month {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .upcoming-info {
+            flex: 1;
+        }
+
+        .upcoming-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .upcoming-details {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .upcoming-detail {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .upcoming-detail i {
+            color: #3498db;
+            font-size: 12px;
+        }
+
+        .upcoming-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-due {
+            background: rgba(241, 196, 15, 0.1);
+            color: #f39c12;
+        }
+
+        .status-urgent {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
+
+        /* Системная информация */
+        .system-info {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-top: 30px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .info-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .info-item:nth-child(1) .info-icon {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+        }
+
+        .info-item:nth-child(2) .info-icon {
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        }
+
+        .info-item:nth-child(3) .info-icon {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+        }
+
+        .info-content h4 {
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .info-content p {
+            margin: 0;
+            color: #7f8c8d;
+            font-size: 0.85rem;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1200px) {
+            .welcome-content h1 {
+                font-size: 2rem;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 15px;
+            }
+
+            .welcome-section {
+                padding: 30px 20px;
+                text-align: center;
+            }
+
+            .welcome-content h1 {
+                font-size: 1.8rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .upcoming-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .upcoming-date {
+                margin-right: 0;
+                width: 100%;
+            }
+
+            .upcoming-details {
+                justify-content: center;
+            }
+
+            .section-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .welcome-content h1 {
+                font-size: 1.5rem;
+            }
+
+            .stat-value {
+                font-size: 1.8rem;
+            }
+
+            .action-card {
+                padding: 20px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Анимации */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-section, .stats-grid, .quick-actions, .upcoming-section, .system-info {
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .stats-grid { animation-delay: 0.1s; }
+        .quick-actions { animation-delay: 0.2s; }
+        .upcoming-section { animation-delay: 0.3s; }
+        .system-info { animation-delay: 0.4s; }
+
+        /* Градиентные тексты */
+        .gradient-text {
+            background: linear-gradient(45deg, #3498db, #9b59b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="sidebar">
+        <h2><i class="fas fa-cogs"></i> Управление ТО</h2>
+        <ul class="nav-menu">
+            <li><a class="active" href="/"><i class="fas fa-home"></i> Главная</a></li>
+            <li><a href="/machines"><i class="fas fa-industry"></i> Оборудование</a></li>
+            <li><a href="/maintenance-types"><i class="fas fa-tools"></i> Виды ТО</a></li>
+            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
+            <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
+            <li><a href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="dashboard">
+            <!-- Приветственная секция -->
+            <div class="welcome-section">
+                <div class="welcome-content">
+                    <h1>Добро пожаловать в систему ТО!</h1>
+                    <p>Централизованная система управления техническим обслуживанием оборудования.
+                        Контролируйте графики, отслеживайте выполнение и оптимизируйте процессы.</p>
+                </div>
+            </div>
+
+            <!-- Статистика -->
+            <div class="stats-grid">
+                <div class="stat-card overdue">
+                    <div class="stat-header">
+                        <div>
+                            <h3 class="stat-title">Просроченные ТО</h3>
+                            <div class="stat-value" th:text="${overdueCount}">0</div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                    <div class="stat-change negative" th:if="${overdueCount > 0}">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>Требуют срочного внимания</span>
+                    </div>
+                    <div class="stat-change positive" th:unless="${overdueCount > 0}">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Все ТО выполнены вовремя</span>
+                    </div>
+                </div>
+
+                <div class="stat-card machines">
+                    <div class="stat-header">
+                        <div>
+                            <h3 class="stat-title">Всего оборудования</h3>
+                            <div class="stat-value" th:text="${machineCount}">0</div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-industry"></i>
+                        </div>
+                    </div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-chart-line"></i>
+                        <span>В системе</span>
+                    </div>
+                </div>
+
+                <div class="stat-card types" th:if="${typesCount != null}">
+                    <div class="stat-header">
+                        <div>
+                            <h3 class="stat-title">Видов ТО</h3>
+                            <div class="stat-value" th:text="${typesCount}">0</div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                    </div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-list"></i>
+                        <span>Различных типов обслуживания</span>
+                    </div>
+                </div>
+
+                <div class="stat-card schedule" th:if="${scheduledCount != null}">
+                    <div class="stat-header">
+                        <div>
+                            <h3 class="stat-title">Запланировано</h3>
+                            <div class="stat-value" th:text="${scheduledCount}">0</div>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                    </div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-clock"></i>
+                        <span>На этот месяц</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Быстрые действия -->
+            <div class="quick-actions">
+                <h2><i class="fas fa-bolt"></i> Быстрые действия</h2>
+                <div class="actions-grid">
+                    <a href="/machines" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <h3 class="action-title">Добавить оборудование</h3>
+                        <p class="action-desc">Зарегистрируйте новое оборудование в системе</p>
+                    </a>
+
+                    <a href="/schedule" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-calendar-plus"></i>
+                        </div>
+                        <h3 class="action-title">Запланировать ТО</h3>
+                        <p class="action-desc">Добавьте новое ТО в график обслуживания</p>
+                    </a>
+
+                    <a href="/maintenance-acts" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-file-signature"></i>
+                        </div>
+                        <h3 class="action-title">Создать акт ТО</h3>
+                        <p class="action-desc">Зафиксируйте выполненное техническое обслуживание</p>
+                    </a>
+
+                    <a href="/calendar" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <h3 class="action-title">Просмотреть календарь</h3>
+                        <p class="action-desc">Посмотрите все запланированные ТО на месяц</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Предстоящие ТО -->
+            <div class="upcoming-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-clock"></i> Ближайшие ТО</h2>
+                    <a href="/calendar" class="view-all">
+                        Весь календарь
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="upcoming-list">
+                    <!-- Пример 1 -->
+                    <div class="upcoming-item">
+                        <div class="upcoming-date">
+                            <div class="date-day">20</div>
+                            <div class="date-month">Дек</div>
+                        </div>
+                        <div class="upcoming-info">
+                            <div class="upcoming-title">Токарный станок ЧПУ-500</div>
+                            <div class="upcoming-details">
+                                <div class="upcoming-detail">
+                                    <i class="fas fa-wrench"></i>
+                                    <span>Плановый осмотр</span>
+                                </div>
+                                <div class="upcoming-detail">
+                                    <i class="fas fa-user-cog"></i>
+                                    <span>Иванов И.И.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="upcoming-status status-due">
+                            Завтра
+                        </div>
+                    </div>
+
+                    <!-- Пример 2 -->
+                    <div class="upcoming-item">
+                        <div class="upcoming-date">
+                            <div class="date-day">22</div>
+                            <div class="date-month">Дек</div>
+                        </div>
+                        <div class="upcoming-info">
+                            <div class="upcoming-title">Фрезерный станок MX-200</div>
+                            <div class="upcoming-details">
+                                <div class="upcoming-detail">
+                                    <i class="fas fa-wrench"></i>
+                                    <span>Замена масла</span>
+                                </div>
+                                <div class="upcoming-detail">
+                                    <i class="fas fa-user-cog"></i>
+                                    <span>Петров П.П.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="upcoming-status status-due">
+                            2 дня
+                        </div>
+                    </div>
+
+                    <!-- Пример 3 -->
+                    <div class="upcoming-item">
+                        <div class="upcoming-date">
+                            <div class="date-day">25</div>
+                            <div class="date-month">Дек</div>
+                        </div>
+                        <div class="upcoming-info">
+                            <div class="upcoming-title">Пресс гидравлический ПГ-100</div>
+                            <div class="upcoming-details">
+                                <div class="upcoming-detail">
+                                    <i class="fas fa-wrench"></i>
+                                    <span>Техническое обслуживание</span>
+                                </div>
+                                <div class="upcoming-detail">
+                                    <i class="fas fa-user-cog"></i>
+                                    <span>Сидоров С.С.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="upcoming-status status-urgent">
+                            СРОЧНО
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Системная информация -->
+            <div class="system-info">
+                <h2><i class="fas fa-info-circle"></i> О системе</h2>
+                <p style="color: #7f8c8d; margin-bottom: 20px;">Система управления техническим обслуживанием помогает эффективно контролировать и планировать работы</p>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Надежность оборудования</h4>
+                            <p>Своевременное ТО увеличивает срок службы на 40%</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Снижение простоев</h4>
+                            <p>Плановое обслуживание уменьшает аварийные остановки</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="info-content">
+                            <h4>Экономия средств</h4>
+                            <p>Предотвращение серьезных поломок экономит до 60% затрат</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function() {
+        // Анимация статистики
+        function animateStats() {
+            const stats = document.querySelectorAll('.stat-value');
+            stats.forEach(stat => {
+                const finalValue = parseInt(stat.textContent);
+                if (finalValue > 0) {
+                    let current = 0;
+                    const increment = finalValue / 30;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= finalValue) {
+                            stat.textContent = finalValue;
+                            clearInterval(timer);
+                        } else {
+                            stat.textContent = Math.floor(current);
+                        }
+                    }, 30);
+                }
+            });
+        }
+
+        // Запускаем анимацию после загрузки
+        setTimeout(animateStats, 500);
+
+        // Обновляем статусы в реальном времени
+        function updateStatuses() {
+            const now = new Date();
+            const items = document.querySelectorAll('.upcoming-item');
+
+            items.forEach(item => {
+                const statusEl = item.querySelector('.upcoming-status');
+                if (statusEl && statusEl.textContent.includes('СРОЧНО')) {
+                    // Мигание для срочных ТО
+                    if (now.getSeconds() % 2 === 0) {
+                        statusEl.style.animation = 'pulse 1s infinite';
+                    }
+                }
+            });
+        }
+
+        // Обновляем каждую секунду
+        setInterval(updateStatuses, 1000);
+
+        // Добавляем анимацию пульсации
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { opacity: 1; }
+                50% { opacity: 0.5; }
+                100% { opacity: 1; }
+            }
+
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+
+            .stat-card {
+                animation: slideInRight 0.5s ease-out;
+                animation-fill-mode: both;
+            }
+
+            .stat-card:nth-child(1) { animation-delay: 0.1s; }
+            .stat-card:nth-child(2) { animation-delay: 0.2s; }
+            .stat-card:nth-child(3) { animation-delay: 0.3s; }
+            .stat-card:nth-child(4) { animation-delay: 0.4s; }
+        `;
+        document.head.appendChild(style);
+
+        // Подсветка активного меню
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        // Показываем уведомление о новых просроченных ТО
+        const overdueCount = parseInt(document.querySelector('.overdue .stat-value').textContent);
+        if (overdueCount > 0) {
+            setTimeout(() => {
+                showNotification(`Внимание: ${overdueCount} просроченных ТО требуют внимания`, 'warning');
+            }, 2000);
+        }
+    });
+
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: ${type === 'warning' ? '#e74c3c' : '#3498db'};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease-out;
+            max-width: 400px;
+        `;
+
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+            <span>${message}</span>
+            <button onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; color: white; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Автоматическое скрытие через 5 секунд
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.style.animation = 'slideOutRight 0.3s ease-out forwards';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 5000);
+
+        // Добавляем анимацию выхода
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

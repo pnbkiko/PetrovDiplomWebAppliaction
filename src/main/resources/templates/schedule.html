@@ -1,0 +1,316 @@
+<!-- src/main/resources/templates/schedule.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>График ТО | Система ТО</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="schedule">
+<div class="container">
+    <div class="sidebar">
+        <h2><i class="fas fa-cogs"></i> Управление ТО</h2>
+        <ul class="nav-menu">
+            <li><a href="/"><i class="fas fa-home"></i> Главная</a></li>
+            <li><a href="/machines"><i class="fas fa-industry"></i> Оборудование</a></li>
+            <li><a href="/maintenance-types"><i class="fas fa-tools"></i> Виды ТО</a></li>
+            <li><a class="active" href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
+            <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
+            <li><a href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <h1><i class="fas fa-calendar-alt"></i> График технического обслуживания</h1>
+
+            <!-- Статистика -->
+            <div class="stats" style="margin-top: 15px; display: flex; gap: 20px;">
+                <div class="stat-item">
+                    <i class="fas fa-clock" style="color: #ff6b6b;"></i>
+                    <span>Просрочено: <strong th:text="${overdueCount}">0</strong></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-calendar-check" style="color: #51cf66;"></i>
+                    <span>Предстоящие: <strong th:text="${pendingCount}">0</strong></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Сообщения об успехе/ошибке -->
+        <div th:if="${success}" class="alert alert-success" style="margin-bottom: 20px;">
+            <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert" style="background: #f8d7da; color: #721c24; border-color: #f5c6cb; margin-bottom: 20px;">
+            <i class="fas fa-exclamation-triangle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <div class="content">
+            <!-- Форма добавления -->
+            <div class="card">
+                <h2><i class="fas fa-plus-circle"></i> Добавить в график ТО</h2>
+                <form th:action="@{/schedule/add}" th:object="${schedule}" method="post">
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Оборудование</label>
+                            <select th:field="*{id.machineId}" class="form-select" required>
+                                <option value="">Выберите оборудование</option>
+                                <option th:each="machine : ${machines}"
+                                        th:value="${machine.id}"
+                                        th:text="${machine.model + ' (' + machine.invNumber + ')'}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Вид ТО</label>
+                            <select th:field="*{id.typeId}" class="form-select" required>
+                                <option value="">Выберите вид ТО</option>
+                                <option th:each="type : ${types}"
+                                        th:value="${type.id}"
+                                        th:text="${type.name}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                        <div class="form-group">
+                            <label>Дата последнего ТО</label>
+                            <input type="date" th:field="*{lastDone}">
+                        </div>
+                        <div class="form-group">
+                            <label>Следующее ТО</label>
+                            <input type="date" th:field="*{nextDue}" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" style="margin-top: 15px;">
+                        <i class="fas fa-save"></i> Сохранить запись
+                    </button>
+                </form>
+            </div>
+
+            <!-- Список записей графика -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2><i class="fas fa-list"></i> Записи графика ТО</h2>
+                    <div class="total-count">
+                        Всего записей: <strong th:text="${schedules.size()}">0</strong>
+                    </div>
+                </div>
+
+                <div th:if="${schedules.empty}" style="text-align: center; padding: 40px; color: #666;">
+                    <i class="fas fa-calendar-alt fa-3x" style="margin-bottom: 15px; opacity: 0.3;"></i>
+                    <p>Записи в графике отсутствуют</p>
+                </div>
+
+                <div th:unless="${schedules.empty}" style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Оборудование</th>
+                            <th>Вид ТО</th>
+                            <th>Последнее ТО</th>
+                            <th>Следующее ТО</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="schedule : ${schedules}">
+                            <td>
+                                <div><strong th:text="${schedule.machine.model}"></strong></div>
+                                <div style="font-size: 12px; color: #666; margin-top: 3px;">
+                                    <i class="fas fa-hashtag"></i> <code th:text="${schedule.machine.invNumber}"></code>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:text="${schedule.maintenanceType.name}"></span>
+                                <div style="font-size: 12px; color: #666; margin-top: 3px;">
+                                    <i class="fas fa-clock"></i>
+                                    <span th:text="${schedule.maintenanceType.name} + ' дней'"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:text="${schedule.lastDone != null ? schedule.lastDone : 'Не выполнено'}"
+                                      th:class="${schedule.lastDone != null ? '' : 'text-muted'}"></span>
+                            </td>
+                            <td>
+                                <span th:text="${schedule.nextDue}"></span>
+                            </td>
+                            <td>
+                                <span th:if="${schedule.nextDue.isBefore(T(java.time.LocalDate).now())}"
+                                      class="badge overdue">
+                                    <i class="fas fa-exclamation-triangle"></i> Просрочено
+                                </span>
+                                <span th:unless="${schedule.nextDue.isBefore(T(java.time.LocalDate).now())}"
+                                      class="badge" style="background: #51cf66; color: white;">
+                                    <i class="fas fa-check-circle"></i> По графику
+                                </span>
+                            </td>
+                            <td>
+                                <form th:action="@{/schedule/delete}" method="post" style="display: inline;">
+                                    <input type="hidden" name="machineId" th:value="${schedule.machine.id}">
+                                    <input type="hidden" name="typeId" th:value="${schedule.maintenanceType.id}">
+                                    <button type="submit"
+                                            class="btn-delete-sm"
+                                            onclick="return confirm('Удалить запись из графика?')">
+                                        <i class="fas fa-trash-alt"></i> Удалить
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function() {
+        // Автозаполнение дат
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+        const today = new Date().toISOString().split('T')[0];
+
+        dateInputs.forEach(input => {
+            if (input.name === 'nextDue' && !input.value) {
+                input.value = today;
+            }
+
+            // Установка минимальной даты
+            input.min = today;
+        });
+
+        // Подтверждение удаления с улучшенной анимацией
+        const deleteForms = document.querySelectorAll('form[onsubmit]');
+        deleteForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if (!confirm('Вы уверены, что хотите удалить эту запись из графика?')) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                const btn = this.querySelector('button[type="submit"]');
+                if (btn) {
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    btn.disabled = true;
+
+                    setTimeout(() => {
+                        if (btn.disabled) {
+                            btn.innerHTML = originalHTML;
+                            btn.disabled = false;
+                        }
+                    }, 5000);
+                }
+            });
+        });
+
+        // Автоматическое заполнение следующей даты
+        const lastDoneInput = document.querySelector('input[name="lastDone"]');
+        const nextDueInput = document.querySelector('input[name="nextDue"]');
+
+        if (lastDoneInput && nextDueInput) {
+            lastDoneInput.addEventListener('change', function() {
+                if (this.value) {
+                    const lastDate = new Date(this.value);
+                    const nextDate = new Date(lastDate);
+                    nextDate.setDate(nextDate.getDate() + 30); // 30 дней по умолчанию
+                    nextDueInput.value = nextDate.toISOString().split('T')[0];
+                }
+            });
+        }
+    });
+    /*]]>*/
+</script>
+
+<style>
+    /* Стили для статусных бейджей */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge.overdue {
+        background: #ff6b6b;
+        color: white;
+    }
+
+    /* Статистика в заголовке */
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: white;
+        padding: 8px 15px;
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        font-size: 14px;
+    }
+
+    /* Стили для таблицы */
+    .data-table th {
+        background: #4361ee;
+        color: white;
+        font-weight: 600;
+    }
+
+    .data-table td {
+        vertical-align: middle;
+    }
+
+    .text-muted {
+        color: #868e96 !important;
+    }
+
+    .form-select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        font-size: 14px;
+        background-color: white;
+        cursor: pointer;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr !important;
+        }
+
+        .stat-item {
+            font-size: 12px;
+            padding: 6px 10px;
+        }
+
+        .data-table {
+            font-size: 14px;
+        }
+
+        .btn-delete-sm {
+            min-width: 60px;
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+    }
+</style>
+</body>
+</html>

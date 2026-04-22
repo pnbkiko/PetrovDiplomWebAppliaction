@@ -1,0 +1,863 @@
+<!-- src/main/resources/templates/maintenance-types.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Виды ТО | Система ТО</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Дополнительные стили для страницы видов ТО */
+        .types-container {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 1200px) {
+            .types-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Карточка формы */
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+            height: fit-content;
+            position: sticky;
+            top: 30px;
+        }
+
+        .form-card h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #f0f2f5;
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-card h2 i {
+            color: #9b59b6;
+            font-size: 1.3rem;
+        }
+
+        /* Улучшенные формы */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group label i {
+            color: #7f8c8d;
+            font-size: 14px;
+            width: 20px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+            font-family: inherit;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #9b59b6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(155, 89, 182, 0.1);
+        }
+
+        /* Кнопка добавления */
+        .btn-add-type {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-add-type:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(155, 89, 182, 0.3);
+        }
+
+        /* Карточка списка */
+        .list-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #f0f2f5;
+        }
+
+        .list-header h2 {
+            color: #2c3e50;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .list-header h2 i {
+            color: #9b59b6;
+            font-size: 1.3rem;
+        }
+
+        .total-badge {
+            background: #9b59b6;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Сетка видов ТО */
+        .types-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .types-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Карточка вида ТО */
+        .type-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            border: 2px solid #f0f2f5;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .type-card:hover {
+            transform: translateY(-5px);
+            border-color: #9b59b6;
+            box-shadow: 0 15px 35px rgba(155, 89, 182, 0.15);
+        }
+
+        .type-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(180deg, #9b59b6, #8e44ad);
+        }
+
+        .type-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .type-id {
+            background: #f0f2f5;
+            color: #7f8c8d;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .type-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .type-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .type-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .detail-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            color: #9b59b6;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .detail-content h4 {
+            margin: 0 0 4px 0;
+            color: #7f8c8d;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-content p {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        /* Индикатор частоты */
+        .frequency-indicator {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #f0f2f5;
+        }
+
+        .frequency-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+
+        .frequency-bar {
+            height: 8px;
+            background: #f0f2f5;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .frequency-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #9b59b6, #8e44ad);
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        /* Кнопки действий */
+        .btn-edit {
+            background: #3498db;
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-edit:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-delete-type {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-delete-type:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+
+        /* Состояние пустого списка */
+        .empty-state {
+            text-align: center;
+            padding: 60px 30px;
+            color: #7f8c8d;
+            border: 2px dashed #e9ecef;
+            border-radius: 12px;
+            background: #fafafa;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin: 0;
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Примеры частот */
+        .frequency-examples {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #9b59b6;
+        }
+
+        .frequency-examples h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .example-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+
+        .example-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .example-interval {
+            color: #9b59b6;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        /* Индикатор важности */
+        .importance-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .importance-high {
+            background: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+        }
+
+        .importance-medium {
+            background: #f39c12;
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2);
+        }
+
+        .importance-low {
+            background: #2ecc71;
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
+        }
+
+        /* Анимации */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .form-card {
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        .list-card {
+            animation: slideInRight 0.6s ease-out;
+        }
+
+        .type-card {
+            animation: fadeInUp 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        /* Задержки для анимации карточек */
+        .type-card:nth-child(1) { animation-delay: 0.1s; }
+        .type-card:nth-child(2) { animation-delay: 0.2s; }
+        .type-card:nth-child(3) { animation-delay: 0.3s; }
+        .type-card:nth-child(4) { animation-delay: 0.4s; }
+        .type-card:nth-child(5) { animation-delay: 0.5s; }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .types-container {
+                gap: 20px;
+            }
+
+            .form-card, .list-card {
+                padding: 25px;
+                position: static;
+            }
+
+            .list-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .type-card {
+                padding: 20px;
+            }
+
+            .type-name {
+                font-size: 1.1rem;
+            }
+
+            .frequency-examples {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-card, .list-card {
+                padding: 20px;
+            }
+
+            .form-card h2, .list-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .type-card {
+                padding: 15px;
+            }
+
+            .examples-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="maintenance-types">
+<div class="container">
+    <div class="sidebar">
+        <h2><i class="fas fa-cogs"></i> Управление ТО</h2>
+        <ul class="nav-menu">
+            <li><a href="/"><i class="fas fa-home"></i> Главная</a></li>
+            <li><a href="/machines"><i class="fas fa-industry"></i> Оборудование</a></li>
+            <li><a class="active" href="/maintenance-types"><i class="fas fa-tools"></i> Виды ТО</a></li>
+            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
+            <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
+            <li><a href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <h1><i class="fas fa-tools"></i> Виды технического обслуживания</h1>
+        </header>
+
+        <div class="content">
+            <div class="types-container">
+                <!-- Форма добавления -->
+                <div class="form-card">
+                    <h2><i class="fas fa-plus-circle"></i> Создать новый вид ТО</h2>
+                    <form th:action="@{/maintenance-types/add}" th:object="${type}" method="post" id="typeForm">
+                        <div class="form-group">
+                            <label><i class="fas fa-tag"></i> Название вида ТО</label>
+                            <input type="text" th:field="*{name}"
+                                   placeholder="Например: Ежедневное обслуживание"
+                                   required
+                                   maxlength="50">
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar-alt"></i> Интервал выполнения</label>
+                            <input type="number" th:field="*{intervalDays}"
+                                   placeholder="Количество дней между ТО"
+                                   required
+                                   min="1"
+                                   max="365"
+                                   step="1">
+                        </div>
+
+                        <button type="submit" class="btn-add-type">
+                            <i class="fas fa-save"></i> Создать вид ТО
+                        </button>
+                    </form>
+
+                    <!-- Примеры частот -->
+                    <div class="frequency-examples">
+                        <h4><i class="fas fa-lightbulb"></i> Примеры интервалов:</h4>
+                        <div class="examples-grid">
+                            <div class="example-item">
+                                <div class="example-name">Ежедневное</div>
+                                <div class="example-interval">1 день</div>
+                            </div>
+                            <div class="example-item">
+                                <div class="example-name">Еженедельное</div>
+                                <div class="example-interval">7 дней</div>
+                            </div>
+                            <div class="example-item">
+                                <div class="example-name">Ежемесячное</div>
+                                <div class="example-interval">30 дней</div>
+                            </div>
+                            <div class="example-item">
+                                <div class="example-name">Квартальное</div>
+                                <div class="example-interval">90 дней</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Список видов ТО -->
+                <div class="list-card">
+                    <div class="list-header">
+                        <h2><i class="fas fa-list"></i> Все виды ТО</h2>
+                        <div class="total-badge" th:text="${types.size() + ' видов'}"></div>
+                    </div>
+
+                    <div th:if="${types.empty}" class="empty-state">
+                        <i class="fas fa-tools"></i>
+                        <h3>Виды ТО не найдены</h3>
+                        <p>Создайте первый вид технического обслуживания, используя форму слева</p>
+                    </div>
+
+                    <div th:unless="${types.empty}" class="types-grid" id="typesGrid">
+                        <div th:each="type, iter : ${types}" class="type-card">
+                            <!-- Индикатор важности -->
+                            <div th:if="${type.intervalDays <= 7}" class="importance-indicator importance-high"></div>
+                            <div th:if="${type.intervalDays > 7 and type.intervalDays <= 30}" class="importance-indicator importance-medium"></div>
+                            <div th:if="${type.intervalDays > 30}" class="importance-indicator importance-low"></div>
+
+                            <div class="type-header">
+                                <div class="type-id" th:text="${type.id}"></div>
+                                <div class="type-actions">
+                                    <!-- Кнопка редактирования (заглушка) -->
+                                    <button type="button" class="btn-edit"
+                                            th:onclick="'showEditForm(' + ${type.id} + ')'"
+                                            title="Редактировать">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+
+                                    <!-- Кнопка удаления -->
+                                    <form th:action="@{/maintenance-types/delete/{id}(id=${type.id})}"
+                                          method="post"
+                                          onsubmit="return confirmDeleteType()"
+                                          style="display: inline;">
+                                        <button type="submit" class="btn-delete-type" title="Удалить">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="type-name" th:text="${type.name}"></div>
+
+                            <div class="type-details">
+                                <div class="detail-item">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <div class="detail-content">
+                                        <h4>Интервал выполнения</h4>
+                                        <p th:text="${type.intervalDays} + ' дней'"></p>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </div>
+                                    <div class="detail-content">
+                                        <h4>Частота в год</h4>
+                                        <!-- Исправленный расчет частоты -->
+                                        <p th:with="timesPerYear=${365 div type.intervalDays}">
+                                            <span th:text="${#numbers.formatDecimal(timesPerYear, 1, 1)}"></span> раз
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Индикатор частоты -->
+                            <div class="frequency-indicator">
+                                <div class="frequency-label">
+                                    <span>Редко</span>
+                                    <span>Часто</span>
+                                </div>
+                                <div class="frequency-bar">
+                                    <!-- Исправленный расчет ширины -->
+                                    <div class="frequency-fill"
+                                         th:style="'width: ' +
+                                                  ${100 - (type.intervalDays / 365 * 100)} + '%;'">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function() {
+        // Валидация формы
+        const typeForm = document.getElementById('typeForm');
+        if (typeForm) {
+            typeForm.addEventListener('submit', function(e) {
+                const nameInput = this.querySelector('input[type="text"]');
+                const intervalInput = this.querySelector('input[type="number"]');
+
+                // Проверка названия
+                if (nameInput.value.trim().length < 3) {
+                    e.preventDefault();
+                    showNotification('Название должно содержать минимум 3 символа', 'error');
+                    nameInput.focus();
+                    return false;
+                }
+
+                // Проверка интервала
+                const interval = parseInt(intervalInput.value);
+                if (interval < 1 || interval > 365) {
+                    e.preventDefault();
+                    showNotification('Интервал должен быть от 1 до 365 дней', 'error');
+                    intervalInput.focus();
+                    return false;
+                }
+
+                // Показываем загрузку
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    const originalHTML = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Создание...';
+                    submitBtn.disabled = true;
+
+                    // Восстанавливаем через 5 секунд на всякий случай
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalHTML;
+                        submitBtn.disabled = false;
+                    }, 5000);
+                }
+
+                return true;
+            });
+        }
+
+        // Подтверждение удаления
+        function confirmDeleteType() {
+            return confirm('Вы уверены, что хотите удалить этот вид ТО?\\n\\nЭто действие нельзя отменить, и все связанные записи будут удалены.');
+        }
+
+        // Анимация заполнения индикаторов частоты
+        function animateFrequencyBars() {
+            document.querySelectorAll('.frequency-fill').forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 300);
+            });
+        }
+
+        // Запускаем анимацию после загрузки
+        setTimeout(animateFrequencyBars, 500);
+
+        // Подсветка новых записей
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('success')) {
+            showNotification('Вид ТО успешно создан!', 'success');
+
+            // Подсвечиваем последнюю добавленную карточку
+            const lastCard = document.querySelector('.type-card:last-child');
+            if (lastCard) {
+                lastCard.style.animation = 'pulse 2s';
+                setTimeout(() => {
+                    lastCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        }
+    });
+
+    // Функция редактирования (заглушка)
+    function showEditForm(typeId) {
+        alert('Редактирование вида ТО #' + typeId + '\\n\\nЭта функция в разработке.');
+        // В будущем можно реализовать модальное окно редактирования
+    }
+
+    // Уведомления
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#27ae60' : '#e74c3c'};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 400px;
+        `;
+
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            <span>${message}</span>
+            <button onclick="this.parentElement.remove()"
+                    style="margin-left: auto; background: none; border: none; color: white; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Автоматическое скрытие
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.style.animation = 'slideOut 0.3s ease-out forwards';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 3000);
+
+        // Добавляем стили анимации
+        if (!document.querySelector('#notificationStyles')) {
+            const style = document.createElement('style');
+            style.id = 'notificationStyles';
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+                @keyframes pulse {
+                    0% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0.7); }
+                    70% { box-shadow: 0 0 0 10px rgba(155, 89, 182, 0); }
+                    100% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

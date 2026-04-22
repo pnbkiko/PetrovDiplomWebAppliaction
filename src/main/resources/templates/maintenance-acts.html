@@ -1,0 +1,881 @@
+<!--&lt;!&ndash; src/main/resources/templates/maintenance-acts.html &ndash;&gt;-->
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Акты ТО</title>-->
+<!--    <link rel="stylesheet" th:href="@{/css/style.css}">-->
+
+<!--    -->
+<!--    <link rel="stylesheet" th:href="@{/css/icons.css}">-->
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <div class="sidebar">-->
+<!--        <h2>Управление ТО</h2>-->
+<!--        <ul class="nav-menu">-->
+<!--            <li><a href="/">Главная</a></li>-->
+<!--            <li><a href="/machines">Оборудование</a></li>-->
+<!--            <li><a href="/maintenance-types">Виды ТО</a></li>-->
+<!--            <li><a href="/schedule">График ТО</a></li>-->
+<!--            <li><a class="active" href="/maintenance-acts">Акты ТО</a></li>-->
+<!--            <li><a href="/calendar">Календарь ТО</a></li>-->
+<!--        </ul>-->
+<!--    </div>-->
+
+<!--    <div class="main-content">-->
+<!--        <header>-->
+<!--            <h1>Акты технического обслуживания</h1>-->
+<!--        </header>-->
+
+<!--        <div class="content">-->
+<!--            &lt;!&ndash; Форма добавления &ndash;&gt;-->
+<!--            <div class="card">-->
+<!--                <h2>Добавить акт ТО</h2>-->
+<!--                <form th:action="@{/maintenance-acts/add}" th:object="${act}" method="post">-->
+<!--                    <div class="form-group">-->
+<!--                        <label>Оборудование:</label>-->
+<!--                        <select th:field="*{machine}" required>-->
+<!--                            <option value="">Выберите оборудование</option>-->
+<!--                            <option th:each="machine : ${machines}"-->
+<!--                                    th:value="${machine.id}"-->
+<!--                                    th:text="${machine.model + ' (' + machine.invNumber + ')'}">-->
+<!--                            </option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label>Вид ТО:</label>-->
+<!--                        <select th:field="*{maintenanceType}" required>-->
+<!--                            <option value="">Выберите вид ТО</option>-->
+<!--                            <option th:each="type : ${types}"-->
+<!--                                    th:value="${type.id}"-->
+<!--                                    th:text="${type.name}">-->
+<!--                            </option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label>Дата выполнения:</label>-->
+<!--                        <input type="date" th:field="*{date}" required>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label>Инженер:</label>-->
+<!--                        <input type="text" th:field="*{engineer}" placeholder="ФИО инженера" required>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label>Примечания:</label>-->
+<!--                        <textarea th:field="*{notes}" placeholder="Примечания" rows="3"></textarea>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label>-->
+<!--                            <input type="checkbox" th:field="*{signed}">-->
+<!--                            Подписан-->
+<!--                        </label>-->
+<!--                    </div>-->
+<!--                    <button type="submit" class="btn">Добавить</button>-->
+<!--                </form>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Список актов ТО &ndash;&gt;-->
+<!--            <div class="card">-->
+<!--                <h2>Список актов ТО</h2>-->
+<!--                <table class="data-table">-->
+<!--                    <thead>-->
+<!--                    <tr>-->
+<!--                        <th>ID</th>-->
+<!--                        <th>Оборудование</th>-->
+<!--                        <th>Вид ТО</th>-->
+<!--                        <th>Дата</th>-->
+<!--                        <th>Инженер</th>-->
+<!--                        <th>Подписан</th>-->
+<!--                        <th>Действия</th>-->
+<!--                    </tr>-->
+<!--                    </thead>-->
+<!--                    <tbody>-->
+<!--                    <tr th:each="act : ${acts}">-->
+<!--                        <td th:text="${act.id}"></td>-->
+<!--                        <td th:text="${act.machine.model}"></td>-->
+<!--                        <td th:text="${act.maintenanceType.name}"></td>-->
+<!--                        <td th:text="${act.date}"></td>-->
+<!--                        <td th:text="${act.engineer}"></td>-->
+<!--                        <td>-->
+<!--                            <span th:if="${act.signed}" class="badge signed">✓</span>-->
+<!--                            <span th:unless="${act.signed}" class="badge not-signed">✗</span>-->
+<!--                        </td>-->
+<!--                        <td>-->
+<!--                            <form th:action="@{/maintenance-acts/delete/{id}(id=${act.id})}"-->
+<!--                                  method="post" style="display: inline;">-->
+<!--                                <button type="submit" class="btn-danger">Удалить</button>-->
+<!--                            </form>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                    </tbody>-->
+<!--                </table>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+<!-- src/main/resources/templates/maintenance-acts.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Акты ТО | Система ТО</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Дополнительные стили для страницы актов */
+        .acts-container {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 1200px) {
+            .acts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Карточка формы */
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+        }
+
+        .form-card h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f2f5;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-card h2 i {
+            color: #3498db;
+            font-size: 1.2rem;
+        }
+
+        /* Улучшенные формы */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group label i {
+            color: #7f8c8d;
+            font-size: 14px;
+            width: 20px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Чекбокс */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        /* Таблица актов */
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+            height: fit-content;
+        }
+
+        .table-card h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f2f5;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-card h2 i {
+            color: #3498db;
+            font-size: 1.2rem;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .total-badge {
+            background: #3498db;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Улучшенная таблица */
+        .acts-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .acts-table thead {
+            background: #f8f9fa;
+        }
+
+        .acts-table th {
+            padding: 16px 20px;
+            text-align: left;
+            color: #2c3e50;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .acts-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        .acts-table tbody tr {
+            transition: all 0.2s;
+        }
+
+        .acts-table tbody tr:hover {
+            background: #f8f9fa;
+            transform: translateX(3px);
+        }
+
+        /* Бейджи статуса */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-signed {
+            background: rgba(39, 174, 96, 0.1);
+            color: #27ae60;
+            border: 1px solid rgba(39, 174, 96, 0.2);
+        }
+
+        .status-not-signed {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+
+        /* Информация в ячейках */
+        .machine-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .machine-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .machine-inv {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .engineer-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .engineer-info i {
+            color: #3498db;
+            font-size: 14px;
+        }
+
+        .date-cell {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        /* Кнопки действий */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-view {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .btn-view:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        /* Состояние пустой таблицы */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin: 0;
+        }
+
+        /* Фильтры */
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+            min-width: 120px;
+        }
+
+        /* Кнопка добавления в форме */
+        .btn-add-act {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-add-act:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-card, .table-card {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .acts-container {
+                gap: 20px;
+            }
+
+            .form-card, .table-card {
+                padding: 20px;
+            }
+
+            .acts-table th,
+            .acts-table td {
+                padding: 12px 15px;
+                font-size: 13px;
+            }
+
+            .table-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .filters {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .btn-view, .btn-delete-sm {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .acts-table {
+                font-size: 12px;
+            }
+
+            .acts-table th,
+            .acts-table td {
+                padding: 10px 12px;
+            }
+
+            .status-badge {
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+        }
+    </style>
+</head>
+<body class="maintenance-acts">
+<div class="container">
+    <div class="sidebar">
+        <h2><i class="fas fa-cogs"></i> Управление ТО</h2>
+        <ul class="nav-menu">
+            <li><a href="/"><i class="fas fa-home"></i> Главная</a></li>
+            <li><a href="/machines"><i class="fas fa-industry"></i> Оборудование</a></li>
+            <li><a href="/maintenance-types"><i class="fas fa-tools"></i> Виды ТО</a></li>
+            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
+            <li><a class="active" href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
+            <li><a href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <h1><i class="fas fa-clipboard-check"></i> Акты технического обслуживания</h1>
+        </header>
+
+        <div class="content">
+            <div class="acts-container">
+                <!-- Форма добавления -->
+                <div class="form-card">
+                    <h2><i class="fas fa-plus-circle"></i> Добавить новый акт ТО</h2>
+                    <form th:action="@{/maintenance-acts/add}" th:object="${act}" method="post" id="actForm">
+                        <div class="form-group">
+                            <label><i class="fas fa-industry"></i> Оборудование</label>
+                            <select th:field="*{machine}" required>
+                                <option value="">Выберите оборудование</option>
+                                <option th:each="machine : ${machines}"
+                                        th:value="${machine.id}"
+                                        th:text="${machine.model + ' (' + machine.invNumber + ')'}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-tools"></i> Вид ТО</label>
+                            <select th:field="*{maintenanceType}" required>
+                                <option value="">Выберите вид ТО</option>
+                                <option th:each="type : ${types}"
+                                        th:value="${type.id}"
+                                        th:text="${type.name}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar-day"></i> Дата выполнения</label>
+                            <input type="date" th:field="*{date}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-user-cog"></i> Инженер</label>
+                            <input type="text" th:field="*{engineer}" placeholder="Введите ФИО инженера" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-sticky-note"></i> Примечания</label>
+                            <textarea th:field="*{notes}"
+                                      placeholder="Дополнительная информация о выполненном ТО..."
+                                      rows="4"></textarea>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" th:field="*{signed}" id="signedCheckbox">
+                            <label for="signedCheckbox">
+                                <i class="fas fa-signature"></i> Акт подписан
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn-add-act">
+                            <i class="fas fa-save"></i> Сохранить акт ТО
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Список актов ТО -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h2><i class="fas fa-list"></i> Список актов ТО</h2>
+                        <div class="total-badge" th:text="${acts.size() + ' актов'}"></div>
+                    </div>
+
+                    <!-- Фильтры -->
+                    <div class="filters">
+                        <div class="filter-group">
+                            <span class="filter-label">Статус:</span>
+                            <select class="filter-select" id="statusFilter">
+                                <option value="all">Все</option>
+                                <option value="signed">Подписанные</option>
+                                <option value="not-signed">Не подписанные</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <span class="filter-label">Сортировка:</span>
+                            <select class="filter-select" id="sortFilter">
+                                <option value="date-desc">По дате (новые)</option>
+                                <option value="date-asc">По дате (старые)</option>
+                                <option value="engineer">По инженеру</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div th:if="${acts.empty}" class="empty-state">
+                        <i class="fas fa-clipboard"></i>
+                        <p>Акты ТО не найдены</p>
+                        <p style="font-size: 14px; margin-top: 10px;">Добавьте первый акт ТО, используя форму слева</p>
+                    </div>
+
+                    <div th:unless="${acts.empty}" style="overflow-x: auto;">
+                        <table class="acts-table">
+                            <thead>
+                            <tr>
+                                <th style="width: 70px;">ID</th>
+                                <th style="width: 25%;">Оборудование</th>
+                                <th style="width: 20%;">Вид ТО</th>
+                                <th style="width: 15%;">Дата</th>
+                                <th style="width: 15%;">Инженер</th>
+                                <th style="width: 15%;">Статус</th>
+                                <th style="width: 100px;">Действия</th>
+                            </tr>
+                            </thead>
+                            <tbody id="actsTableBody">
+                            <tr th:each="act : ${acts}">
+                                <td>
+                                    <span style="font-weight: 600; color: #3498db;" th:text="${act.id}"></span>
+                                </td>
+                                <td>
+                                    <div class="machine-info">
+                                        <div class="machine-name" th:text="${act.machine.model}"></div>
+                                        <div class="machine-inv" th:text="${act.machine.invNumber}"></div>
+                                    </div>
+                                </td>
+                                <td th:text="${act.maintenanceType.name}"></td>
+                                <td class="date-cell" th:text="${act.date}"></td>
+                                <td>
+                                    <div class="engineer-info">
+                                        <i class="fas fa-user-cog"></i>
+                                        <span th:text="${act.engineer}"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                        <span th:if="${act.signed}"
+                                              class="status-badge status-signed">
+                                            <i class="fas fa-check"></i> Подписан
+                                        </span>
+                                    <span th:unless="${act.signed}"
+                                          class="status-badge status-not-signed">
+                                            <i class="fas fa-clock"></i> Ожидает
+                                        </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button type="button" class="btn-view"
+                                                th:onclick="'showActDetails(' + ${act.id} + ')'"
+                                                title="Просмотр деталей">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <form th:action="@{/maintenance-acts/delete/{id}(id=${act.id})}"
+                                              method="post"
+                                              onsubmit="return confirm('Удалить акт ТО?')"
+                                              style="display: inline;">
+                                            <button type="submit" class="btn-delete-sm" title="Удалить">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function() {
+        // Устанавливаем сегодняшнюю дату по умолчанию
+        const dateInput = document.querySelector('input[type="date"]');
+        if (dateInput && !dateInput.value) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
+        }
+
+        // Фильтрация таблицы
+        const statusFilter = document.getElementById('statusFilter');
+        const sortFilter = document.getElementById('sortFilter');
+        const tableBody = document.getElementById('actsTableBody');
+
+        function filterTable() {
+            const status = statusFilter.value;
+            const rows = tableBody.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const signedBadge = row.querySelector('.status-signed');
+                const notSignedBadge = row.querySelector('.status-not-signed');
+                let showRow = true;
+
+                if (status === 'signed' && !signedBadge) {
+                    showRow = false;
+                } else if (status === 'not-signed' && !notSignedBadge) {
+                    showRow = false;
+                }
+
+                row.style.display = showRow ? '' : 'none';
+            });
+        }
+
+        if (statusFilter) {
+            statusFilter.addEventListener('change', filterTable);
+        }
+
+        // Подтверждение удаления с улучшенным диалогом
+        document.querySelectorAll('form[onsubmit]').forEach(form => {
+            const originalOnsubmit = form.onsubmit;
+            form.onsubmit = null;
+            form.addEventListener('submit', function(e) {
+                if (!confirm('Вы уверены, что хотите удалить этот акт ТО?\n\nЭто действие нельзя отменить.')) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Показываем загрузку на кнопке
+                const btn = this.querySelector('button[type="submit"]');
+                if (btn) {
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    btn.disabled = true;
+
+                    // Восстанавливаем кнопку через 5 секунд на всякий случай
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                        btn.disabled = false;
+                    }, 5000);
+                }
+
+                if (originalOnsubmit) {
+                    return originalOnsubmit.call(this, e);
+                }
+            });
+        });
+
+        // Валидация формы
+        const actForm = document.getElementById('actForm');
+        if (actForm) {
+            actForm.addEventListener('submit', function(e) {
+                const engineerInput = this.querySelector('input[type="text"]');
+                if (engineerInput && engineerInput.value.trim().length < 2) {
+                    e.preventDefault();
+                    alert('Пожалуйста, введите полное ФИО инженера');
+                    engineerInput.focus();
+                    return false;
+                }
+
+                // Показываем уведомление об успешном добавлении
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
+                    submitBtn.disabled = true;
+                }
+            });
+        }
+
+        // Подсветка новых строк
+        const rows = tableBody.querySelectorAll('tr');
+        rows.forEach((row, index) => {
+            row.style.animationDelay = (index * 0.1) + 's';
+            row.style.animation = 'fadeIn 0.3s ease-out forwards';
+            row.style.opacity = '0';
+        });
+    });
+
+    // Функция для просмотра деталей акта (заглушка)
+    function showActDetails(actId) {
+        alert('Просмотр деталей акта ТО #' + actId + '\n\nЭта функция в разработке.');
+        // В будущем можно реализовать модальное окно с детальной информацией
+    }
+
+    // Уведомление об успешном добавлении
+    function showSuccessNotification(message) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        `;
+
+        notification.innerHTML = `
+            <i class="fas fa-check-circle" style="font-size: 18px;"></i>
+            <span>${message}</span>
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-out forwards';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+
+        // Добавляем стили для анимации
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // Проверяем, было ли успешное добавление
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('success')) {
+        showSuccessNotification('Акт ТО успешно добавлен!');
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

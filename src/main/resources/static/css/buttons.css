@@ -1,0 +1,231 @@
+/* src/main/resources/static/css/buttons.css */
+/* Основные стили кнопок */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.btn:hover {
+    background: #3a56d4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Кнопка удаления - красивая версия */
+.btn-delete {
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-delete:hover {
+    background: #ff5252;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.btn-delete:active {
+    transform: translateY(0);
+}
+
+.btn-delete i {
+    font-size: 12px;
+}
+
+/* Альтернативная версия кнопки удаления */
+.btn-danger-alt {
+    background: transparent;
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-danger-alt:hover {
+    background: #ff6b6b;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+/* Мини-кнопка удаления (для таблиц) */
+.btn-delete-sm {
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 70px;
+    justify-content: center;
+}
+
+.btn-delete-sm:hover {
+    background: #ff5252;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(255, 107, 107, 0.3);
+}
+
+/* Кнопка с иконкой */
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    color: var(--dark-color);
+    border: 1px solid #dee2e6;
+}
+
+.btn-icon:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Группа кнопок */
+.btn-group {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Кнопка добавления */
+.btn-add {
+    background: #51cf66;
+}
+
+.btn-add:hover {
+    background: #40c057;
+    box-shadow: 0 4px 12px rgba(81, 207, 102, 0.3);
+}
+
+/* Кнопка сохранения */
+.btn-save {
+    background: #339af0;
+}
+
+.btn-save:hover {
+    background: #228be6;
+    box-shadow: 0 4px 12px rgba(51, 154, 240, 0.3);
+}
+
+/* Кнопка отмены */
+.btn-cancel {
+    background: #adb5bd;
+}
+
+.btn-cancel:hover {
+    background: #868e96;
+    box-shadow: 0 4px 12px rgba(173, 181, 189, 0.3);
+}
+
+/* Кнопка с загрузкой */
+.btn-loading {
+    position: relative;
+    color: transparent;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid white;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Отключенная кнопка */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+/* Дополнительные стили кнопок для страницы актов */
+.btn-delete-sm {
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 36px;
+    justify-content: center;
+}
+
+.btn-delete-sm:hover {
+    background: #ff5252;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 107, 107, 0.3);
+}
+
+.btn-delete-sm i {
+    font-size: 12px;
+}
+
+/* Анимация спиннера */
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

@@ -1,0 +1,1521 @@
+<!--&lt;!&ndash; src/main/resources/templates/calendar.html &ndash;&gt;-->
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Календарь ТО</title>-->
+<!--    <link rel="stylesheet" th:href="@{/css/style.css}">-->
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">-->
+<!--    <style>-->
+<!--        /* Основные стили */-->
+<!--        body {-->
+<!--            margin: 0;-->
+<!--            padding: 0;-->
+<!--            background: #f5f7fa;-->
+<!--            font-family: 'Segoe UI', Arial, sans-serif;-->
+<!--        }-->
+
+<!--        .container {-->
+<!--            display: flex;-->
+<!--            min-height: 100vh;-->
+<!--        }-->
+
+<!--        .sidebar {-->
+<!--            width: 220px;-->
+<!--            background: white;-->
+<!--            box-shadow: 2px 0 10px rgba(0,0,0,0.05);-->
+<!--            padding: 20px 0;-->
+<!--            position: fixed;-->
+<!--            height: 100vh;-->
+<!--            overflow-y: auto;-->
+<!--        }-->
+
+<!--        .sidebar h2 {-->
+<!--            padding: 0 20px 20px;-->
+<!--            color: #2c3e50;-->
+<!--            border-bottom: 2px solid #f0f2f5;-->
+<!--            margin-bottom: 20px;-->
+<!--            font-size: 1.3rem;-->
+<!--        }-->
+
+<!--        .nav-menu {-->
+<!--            list-style: none;-->
+<!--            padding: 0 15px;-->
+<!--        }-->
+
+<!--        .nav-menu li {-->
+<!--            margin-bottom: 5px;-->
+<!--        }-->
+
+<!--        .nav-menu a {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 10px;-->
+<!--            padding: 12px 15px;-->
+<!--            color: #2c3e50;-->
+<!--            text-decoration: none;-->
+<!--            border-radius: 8px;-->
+<!--            transition: all 0.2s;-->
+<!--            font-size: 14px;-->
+<!--        }-->
+
+<!--        .nav-menu a:hover {-->
+<!--            background: #f0f2f5;-->
+<!--        }-->
+
+<!--        .nav-menu a.active {-->
+<!--            background: #3498db;-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        .main-content {-->
+<!--            flex: 1;-->
+<!--            margin-left: 220px;-->
+<!--            padding: 20px;-->
+<!--            min-height: 100vh;-->
+<!--        }-->
+
+<!--        header {-->
+<!--            background: white;-->
+<!--            padding: 20px;-->
+<!--            border-radius: 12px;-->
+<!--            margin-bottom: 20px;-->
+<!--            box-shadow: 0 2px 10px rgba(0,0,0,0.05);-->
+<!--        }-->
+
+<!--        header h1 {-->
+<!--            margin: 0;-->
+<!--            color: #2c3e50;-->
+<!--            font-size: 1.5rem;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 10px;-->
+<!--        }-->
+
+<!--        /* Календарь - УВЕЛИЧИВАЕМ ТЕКСТ */-->
+<!--        .calendar-container {-->
+<!--            background: white;-->
+<!--            border-radius: 12px;-->
+<!--            padding: 20px;-->
+<!--            margin-bottom: 20px;-->
+<!--            box-shadow: 0 2px 10px rgba(0,0,0,0.05);-->
+<!--        }-->
+
+<!--        .calendar-header {-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            align-items: center;-->
+<!--            margin-bottom: 20px;-->
+<!--            padding-bottom: 15px;-->
+<!--            border-bottom: 2px solid #f0f2f5;-->
+<!--        }-->
+
+<!--        .calendar-header h2 {-->
+<!--            margin: 0;-->
+<!--            color: #2c3e50;-->
+<!--            font-size: 1.4rem;-->
+<!--            font-weight: 600;-->
+<!--        }-->
+
+<!--        .month-nav {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 15px;-->
+<!--        }-->
+
+<!--        .nav-btn {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            width: 40px;-->
+<!--            height: 40px;-->
+<!--            border-radius: 8px;-->
+<!--            background: #f0f2f5;-->
+<!--            border: none;-->
+<!--            color: #2c3e50;-->
+<!--            cursor: pointer;-->
+<!--            transition: all 0.2s;-->
+<!--            font-size: 16px;-->
+<!--        }-->
+
+<!--        .nav-btn:hover {-->
+<!--            background: #3498db;-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        .today-btn {-->
+<!--            padding: 10px 20px;-->
+<!--            background: #3498db;-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            border-radius: 8px;-->
+<!--            cursor: pointer;-->
+<!--            font-size: 14px;-->
+<!--            font-weight: 500;-->
+<!--            transition: all 0.2s;-->
+<!--        }-->
+
+<!--        .today-btn:hover {-->
+<!--            background: #2980b9;-->
+<!--        }-->
+
+<!--        /* Календарная сетка */-->
+<!--        .calendar-grid {-->
+<!--            width: 100%;-->
+<!--        }-->
+
+<!--        .week-days {-->
+<!--            display: grid;-->
+<!--            grid-template-columns: repeat(7, 1fr);-->
+<!--            gap: 1px;-->
+<!--            margin-bottom: 1px;-->
+<!--            background: #f0f2f5;-->
+<!--        }-->
+
+<!--        .week-day {-->
+<!--            text-align: center;-->
+<!--            padding: 15px 0;-->
+<!--            background: white;-->
+<!--            color: #2c3e50;-->
+<!--            font-weight: 600;-->
+<!--            font-size: 15px;-->
+<!--        }-->
+
+<!--        .calendar-days {-->
+<!--            display: grid;-->
+<!--            grid-template-columns: repeat(7, 1fr);-->
+<!--            gap: 1px;-->
+<!--            background: #f0f2f5;-->
+<!--        }-->
+
+<!--        /* ЯЧЕЙКИ С КРУПНЫМ ТЕКСТОМ */-->
+<!--        .day-cell {-->
+<!--            min-height: 140px; /* Увеличили высоту */-->
+<!--            background: white;-->
+<!--            padding: 12px;-->
+<!--            position: relative;-->
+<!--            overflow: visible; /* Изменено для лучшего отображения */-->
+<!--        }-->
+
+<!--        .day-cell.other-month {-->
+<!--            background: #fafafa;-->
+<!--            color: #bdc3c7;-->
+<!--        }-->
+
+<!--        .day-cell.today {-->
+<!--            background: #e8f4ff !important;-->
+<!--            border: 3px solid #3498db !important;-->
+<!--        }-->
+
+<!--        .day-cell.has-maintenance {-->
+<!--            background: #fff9db !important;-->
+<!--        }-->
+
+<!--        /* КРУПНЫЙ НОМЕР ДНЯ */-->
+<!--        .day-number {-->
+<!--            position: absolute;-->
+<!--            top: 10px;-->
+<!--            right: 10px;-->
+<!--            width: 30px; /* Увеличили */-->
+<!--            height: 30px; /* Увеличили */-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            background: white;-->
+<!--            border-radius: 50%;-->
+<!--            font-weight: bold;-->
+<!--            font-size: 16px; /* Увеличили */-->
+<!--            color: #2c3e50;-->
+<!--            box-shadow: 0 2px 5px rgba(0,0,0,0.1);-->
+<!--        }-->
+
+<!--        .day-cell.other-month .day-number {-->
+<!--            background: #f0f0f0;-->
+<!--            color: #bdc3c7;-->
+<!--        }-->
+
+<!--        .day-cell.today .day-number {-->
+<!--            background: #3498db;-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        /* СПИСОК ТО - КРУПНЫЙ И ПОНЯТНЫЙ */-->
+<!--        .maintenance-list {-->
+<!--            position: absolute;-->
+<!--            top: 45px; /* Отступ от номера дня */-->
+<!--            left: 8px;-->
+<!--            right: 8px;-->
+<!--            bottom: 8px;-->
+<!--            overflow-y: auto;-->
+<!--            padding-right: 5px;-->
+<!--        }-->
+
+<!--        .maintenance-item {-->
+<!--            background: white;-->
+<!--            padding: 8px 10px; /* Увеличили padding */-->
+<!--            margin: 6px 0; /* Увеличили отступ */-->
+<!--            border-radius: 6px;-->
+<!--            border-left: 4px solid #e74c3c; /* Толще */-->
+<!--            font-size: 14px; /* КРУПНЫЙ ТЕКСТ */-->
+<!--            line-height: 1.4;-->
+<!--            overflow: hidden;-->
+<!--            text-overflow: ellipsis;-->
+<!--            white-space: normal; /* Разрешаем перенос строк */-->
+<!--            word-break: break-word; /* Перенос длинных слов */-->
+<!--            box-shadow: 0 2px 4px rgba(0,0,0,0.05);-->
+<!--            transition: all 0.2s;-->
+<!--            color: #2c3e50;-->
+<!--        }-->
+
+<!--        .maintenance-item:hover {-->
+<!--            transform: translateX(3px);-->
+<!--            box-shadow: 0 4px 8px rgba(0,0,0,0.1);-->
+<!--        }-->
+
+<!--        /* Индикатор количества ТО */-->
+<!--        .maintenance-count {-->
+<!--            position: absolute;-->
+<!--            top: 10px;-->
+<!--            left: 10px;-->
+<!--            background: #e74c3c;-->
+<!--            color: white;-->
+<!--            width: 22px;-->
+<!--            height: 22px;-->
+<!--            border-radius: 50%;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            font-size: 12px;-->
+<!--            font-weight: bold;-->
+<!--        }-->
+
+<!--        /* Просроченные ТО */-->
+<!--        .overdue-section {-->
+<!--            background: white;-->
+<!--            border-radius: 12px;-->
+<!--            padding: 20px;-->
+<!--            box-shadow: 0 2px 10px rgba(0,0,0,0.05);-->
+<!--        }-->
+
+<!--        .overdue-header {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 10px;-->
+<!--            margin-bottom: 20px;-->
+<!--            padding-bottom: 15px;-->
+<!--            border-bottom: 2px solid #f0f2f5;-->
+<!--        }-->
+
+<!--        .overdue-header h3 {-->
+<!--            margin: 0;-->
+<!--            color: #2c3e50;-->
+<!--            font-size: 1.3rem;-->
+<!--            font-weight: 600;-->
+<!--        }-->
+
+<!--        .overdue-badge {-->
+<!--            background: #e74c3c;-->
+<!--            color: white;-->
+<!--            padding: 4px 12px;-->
+<!--            border-radius: 12px;-->
+<!--            font-size: 14px;-->
+<!--            font-weight: 600;-->
+<!--        }-->
+
+<!--        .no-overdue {-->
+<!--            text-align: center;-->
+<!--            padding: 40px;-->
+<!--            color: #7f8c8d;-->
+<!--            font-size: 16px;-->
+<!--        }-->
+
+<!--        .no-overdue i {-->
+<!--            font-size: 48px;-->
+<!--            margin-bottom: 15px;-->
+<!--            opacity: 0.3;-->
+<!--        }-->
+
+<!--        .overdue-table {-->
+<!--            width: 100%;-->
+<!--            border-collapse: collapse;-->
+<!--            font-size: 14px;-->
+<!--        }-->
+
+<!--        .overdue-table th {-->
+<!--            background: #f8f9fa;-->
+<!--            padding: 15px;-->
+<!--            text-align: left;-->
+<!--            color: #495057;-->
+<!--            font-weight: 600;-->
+<!--            border-bottom: 2px solid #dee2e6;-->
+<!--            font-size: 14px;-->
+<!--        }-->
+
+<!--        .overdue-table td {-->
+<!--            padding: 15px;-->
+<!--            border-bottom: 1px solid #e9ecef;-->
+<!--            vertical-align: middle;-->
+<!--            font-size: 14px;-->
+<!--        }-->
+
+<!--        .overdue-table tr:hover {-->
+<!--            background: #f8f9fa;-->
+<!--        }-->
+
+<!--        .days-overdue {-->
+<!--            background: #fee;-->
+<!--            color: #c0392b;-->
+<!--            padding: 6px 12px;-->
+<!--            border-radius: 6px;-->
+<!--            font-size: 14px;-->
+<!--            font-weight: 600;-->
+<!--            display: inline-block;-->
+<!--        }-->
+
+<!--        .inv-number {-->
+<!--            font-family: 'Courier New', monospace;-->
+<!--            background: #f8f9fa;-->
+<!--            padding: 4px 8px;-->
+<!--            border-radius: 4px;-->
+<!--            font-size: 13px;-->
+<!--        }-->
+
+<!--        /* Адаптивность */-->
+<!--        @media (max-width: 768px) {-->
+<!--            .container {-->
+<!--                flex-direction: column;-->
+<!--            }-->
+
+<!--            .sidebar {-->
+<!--                width: 100%;-->
+<!--                height: auto;-->
+<!--                position: relative;-->
+<!--            }-->
+
+<!--            .main-content {-->
+<!--                margin-left: 0;-->
+<!--                padding: 15px;-->
+<!--            }-->
+
+<!--            .calendar-header {-->
+<!--                flex-direction: column;-->
+<!--                gap: 15px;-->
+<!--                text-align: center;-->
+<!--            }-->
+
+<!--            .month-nav {-->
+<!--                justify-content: center;-->
+<!--            }-->
+
+<!--            .day-cell {-->
+<!--                min-height: 120px;-->
+<!--                padding: 10px;-->
+<!--            }-->
+
+<!--            .day-number {-->
+<!--                width: 26px;-->
+<!--                height: 26px;-->
+<!--                font-size: 14px;-->
+<!--            }-->
+
+<!--            .maintenance-item {-->
+<!--                font-size: 13px;-->
+<!--                padding: 6px 8px;-->
+<!--                margin: 4px 0;-->
+<!--            }-->
+
+<!--            .maintenance-count {-->
+<!--                width: 20px;-->
+<!--                height: 20px;-->
+<!--                font-size: 11px;-->
+<!--            }-->
+<!--        }-->
+
+<!--        /* Для очень маленьких экранов */-->
+<!--        @media (max-width: 480px) {-->
+<!--            .day-cell {-->
+<!--                min-height: 100px;-->
+<!--                padding: 8px;-->
+<!--            }-->
+
+<!--            .day-number {-->
+<!--                width: 24px;-->
+<!--                height: 24px;-->
+<!--                font-size: 13px;-->
+<!--            }-->
+
+<!--            .maintenance-item {-->
+<!--                font-size: 12px;-->
+<!--                padding: 5px 7px;-->
+<!--                margin: 3px 0;-->
+<!--            }-->
+
+<!--            .week-day {-->
+<!--                font-size: 13px;-->
+<!--                padding: 12px 0;-->
+<!--            }-->
+
+<!--            .calendar-header h2 {-->
+<!--                font-size: 1.2rem;-->
+<!--            }-->
+<!--        }-->
+
+<!--        /* Полоса прокрутки для списка ТО */-->
+<!--        .maintenance-list::-webkit-scrollbar {-->
+<!--            width: 5px;-->
+<!--        }-->
+
+<!--        .maintenance-list::-webkit-scrollbar-track {-->
+<!--            background: #f1f1f1;-->
+<!--            border-radius: 3px;-->
+<!--        }-->
+
+<!--        .maintenance-list::-webkit-scrollbar-thumb {-->
+<!--            background: #c1c1c1;-->
+<!--            border-radius: 3px;-->
+<!--        }-->
+
+<!--        .maintenance-list::-webkit-scrollbar-thumb:hover {-->
+<!--            background: #a8a8a8;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <div class="sidebar">-->
+<!--        <h2><i class="fas fa-cogs"></i> Управление ТО</h2>-->
+<!--        <ul class="nav-menu">-->
+<!--            <li><a href="/"><i class="fas fa-home"></i> Главная</a></li>-->
+<!--            <li><a href="/machines"><i class="fas fa-industry"></i> Оборудование</a></li>-->
+<!--            <li><a href="/maintenance-types"><i class="fas fa-tools"></i> Виды ТО</a></li>-->
+<!--            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>-->
+<!--            <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>-->
+<!--            <li><a class="active" href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>-->
+<!--        </ul>-->
+<!--    </div>-->
+
+<!--    <div class="main-content">-->
+<!--        <header>-->
+<!--            <h1><i class="fas fa-calendar-day"></i> Календарь технического обслуживания</h1>-->
+<!--        </header>-->
+
+<!--        &lt;!&ndash; Календарь &ndash;&gt;-->
+<!--        <div class="calendar-container">-->
+<!--            <div class="calendar-header">-->
+<!--                <h2 th:text="${monthName + ' ' + year}"></h2>-->
+<!--                <div class="month-nav">-->
+<!--                    <a th:href="@{/calendar(year=${prevMonth}, month=${prevMonthNum})}"-->
+<!--                       class="nav-btn" title="Предыдущий месяц">-->
+<!--                        <i class="fas fa-chevron-left"></i>-->
+<!--                    </a>-->
+<!--                    <a th:href="@{/calendar}" class="today-btn">Сегодня</a>-->
+<!--                    <a th:href="@{/calendar(year=${nextMonth}, month=${nextMonthNum})}"-->
+<!--                       class="nav-btn" title="Следующий месяц">-->
+<!--                        <i class="fas fa-chevron-right"></i>-->
+<!--                    </a>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="calendar-grid">-->
+<!--                <div class="week-days">-->
+<!--                    <div class="week-day">Пн</div>-->
+<!--                    <div class="week-day">Вт</div>-->
+<!--                    <div class="week-day">Ср</div>-->
+<!--                    <div class="week-day">Чт</div>-->
+<!--                    <div class="week-day">Пт</div>-->
+<!--                    <div class="week-day">Сб</div>-->
+<!--                    <div class="week-day">Вс</div>-->
+<!--                </div>-->
+
+<!--                <div class="calendar-days">-->
+<!--                    <div th:each="week : ${calendarWeeks}">-->
+<!--                        <div th:each="day : ${week}"-->
+<!--                             th:class="'day-cell' +-->
+<!--                                     (${day.getMonthValue()} != ${month} ? ' other-month' : '') +-->
+<!--                                     (${day.equals(today)} ? ' today' : '') +-->
+<!--                                     (${calendarData.containsKey(day)} ? ' has-maintenance' : '')">-->
+
+<!--                            &lt;!&ndash; Номер дня &ndash;&gt;-->
+<!--                            <div class="day-number" th:text="${day.getDayOfMonth()}"></div>-->
+
+<!--                            &lt;!&ndash; Индикатор количества ТО &ndash;&gt;-->
+<!--                            <div th:if="${calendarData.containsKey(day)}"-->
+<!--                                 class="maintenance-count"-->
+<!--                                 th:text="${calendarData.get(day).size()}">-->
+<!--                            </div>-->
+
+<!--                            &lt;!&ndash; Список ТО - КРУПНЫЙ ТЕКСТ &ndash;&gt;-->
+<!--                            <div th:if="${calendarData.containsKey(day)}" class="maintenance-list">-->
+<!--                                <div th:each="maintenance : ${calendarData.get(day)}"-->
+<!--                                     class="maintenance-item">-->
+<!--                                    <strong th:text="${maintenance}"></strong>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Просроченные ТО &ndash;&gt;-->
+<!--        <div class="overdue-section">-->
+<!--            <div class="overdue-header">-->
+<!--                <i class="fas fa-exclamation-triangle" style="color: #e74c3c; font-size: 20px;"></i>-->
+<!--                <h3>Просроченные ТО</h3>-->
+<!--                <span th:if="${not overdue.empty}" class="overdue-badge" th:text="${overdue.size()}"></span>-->
+<!--            </div>-->
+
+<!--            <div th:if="${overdue.empty}" class="no-overdue">-->
+<!--                <i class="fas fa-check-circle" style="color: #27ae60; font-size: 48px;"></i>-->
+<!--                <p style="font-size: 16px; margin-top: 10px;">Все ТО выполнены вовремя</p>-->
+<!--            </div>-->
+
+<!--            <div th:unless="${overdue.empty}" style="overflow-x: auto;">-->
+<!--                <table class="overdue-table">-->
+<!--                    <thead>-->
+<!--                    <tr>-->
+<!--                        <th style="width: 25%;">Оборудование</th>-->
+<!--                        <th style="width: 15%;">Инв. номер</th>-->
+<!--                        <th style="width: 20%;">Вид ТО</th>-->
+<!--                        <th style="width: 15%;">Дата ТО</th>-->
+<!--                        <th style="width: 15%;">Дней просрочки</th>-->
+<!--                    </tr>-->
+<!--                    </thead>-->
+<!--                    <tbody>-->
+<!--                    <tr th:each="item : ${overdue}">-->
+<!--                        <td>-->
+<!--                            <i class="fas fa-industry" style="color: #3498db; margin-right: 10px; font-size: 16px;"></i>-->
+<!--                            <strong th:text="${item.machine}"></strong>-->
+<!--                        </td>-->
+<!--                        <td><code class="inv-number" th:text="${item.invNumber}"></code></td>-->
+<!--                        <td><strong th:text="${item.type}"></strong></td>-->
+<!--                        <td th:text="${item.dueDate}"></td>-->
+<!--                        <td><span class="days-overdue" th:text="${item.daysOverdue + ' дн.'}"></span></td>-->
+<!--                    </tr>-->
+<!--                    </tbody>-->
+<!--                </table>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<script th:inline="javascript">-->
+<!--    /*<![CDATA[*/-->
+<!--    document.addEventListener('DOMContentLoaded', function() {-->
+<!--        // Автоматическая высота ячеек с учетом контента-->
+<!--        function adjustCellHeights() {-->
+<!--            const cells = document.querySelectorAll('.day-cell');-->
+<!--            let maxHeight = 0;-->
+
+<!--            // Находим максимальную высоту-->
+<!--            cells.forEach(cell => {-->
+<!--                const contentHeight = cell.scrollHeight;-->
+<!--                if (contentHeight > maxHeight) {-->
+<!--                    maxHeight = contentHeight;-->
+<!--                }-->
+<!--            });-->
+
+<!--            // Устанавливаем минимальную высоту-->
+<!--            const minHeight = 140;-->
+<!--            const finalHeight = Math.max(maxHeight, minHeight);-->
+
+<!--            // Применяем ко всем ячейкам-->
+<!--            cells.forEach(cell => {-->
+<!--                cell.style.minHeight = finalHeight + 'px';-->
+<!--            });-->
+<!--        }-->
+
+<!--        // Добавляем иконку для дней с ТО-->
+<!--        document.querySelectorAll('.day-cell.has-maintenance').forEach(cell => {-->
+<!--            if (!cell.querySelector('.maintenance-count')) {-->
+<!--                const count = cell.querySelectorAll('.maintenance-item').length;-->
+<!--                const countBadge = document.createElement('div');-->
+<!--                countBadge.className = 'maintenance-count';-->
+<!--                countBadge.textContent = count;-->
+<!--                cell.insertBefore(countBadge, cell.firstChild);-->
+<!--            }-->
+<!--        });-->
+
+<!--        // Прокрутка к сегодняшнему дню-->
+<!--        const todayCell = document.querySelector('.day-cell.today');-->
+<!--        if (todayCell) {-->
+<!--            setTimeout(() => {-->
+<!--                todayCell.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });-->
+<!--            }, 500);-->
+<!--        }-->
+
+<!--        // Вызываем после загрузки-->
+<!--        setTimeout(adjustCellHeights, 300);-->
+
+<!--        // При изменении размера окна-->
+<!--        window.addEventListener('resize', adjustCellHeights);-->
+
+<!--        // Подсветка при наведении на элемент ТО-->
+<!--        document.addEventListener('mouseover', function(e) {-->
+<!--            if (e.target.closest('.maintenance-item')) {-->
+<!--                e.target.closest('.maintenance-item').style.backgroundColor = '#fff7e6';-->
+<!--            }-->
+<!--        });-->
+
+<!--        document.addEventListener('mouseout', function(e) {-->
+<!--            if (e.target.closest('.maintenance-item')) {-->
+<!--                e.target.closest('.maintenance-item').style.backgroundColor = 'white';-->
+<!--            }-->
+<!--        });-->
+<!--    });-->
+
+<!--    // Функция для отображения подробной информации при клике-->
+<!--    function showMaintenanceDetails(day, items) {-->
+<!--        const modal = document.createElement('div');-->
+<!--        modal.style.cssText = `-->
+<!--            position: fixed;-->
+<!--            top: 0;-->
+<!--            left: 0;-->
+<!--            right: 0;-->
+<!--            bottom: 0;-->
+<!--            background: rgba(0,0,0,0.5);-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            z-index: 1000;-->
+<!--        `;-->
+
+<!--        modal.innerHTML = `-->
+<!--            <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">-->
+<!--                <h3 style="margin-top: 0; color: #2c3e50;">ТО на ${day}</h3>-->
+<!--                <div id="maintenance-items" style="margin: 20px 0;"></div>-->
+<!--                <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()"-->
+<!--                        style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">-->
+<!--                    Закрыть-->
+<!--                </button>-->
+<!--            </div>-->
+<!--        `;-->
+
+<!--        document.body.appendChild(modal);-->
+<!--    }-->
+<!--    /*]]>*/-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+<!-- src/main/resources/templates/calendar.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Календарь ТО</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Основные стили */
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f5f7fa;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            padding: 0 20px 20px;
+            color: #2c3e50;
+            border-bottom: 2px solid #f0f2f5;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0 15px;
+        }
+
+        .nav-menu li {
+            margin-bottom: 5px;
+        }
+
+        .nav-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            color: #2c3e50;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .nav-menu a:hover {
+            background: #f0f2f5;
+        }
+
+        .nav-menu a.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 220px;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        header h1 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Календарь */
+        .calendar-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .calendar-header h2 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #f0f2f5;
+            border: none;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+
+        .nav-btn:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        .today-btn {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .today-btn:hover {
+            background: #2980b9;
+        }
+
+        /* Календарная сетка */
+        .calendar-grid {
+            width: 100%;
+        }
+
+        .week-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            margin-bottom: 1px;
+            background: #f0f2f5;
+        }
+
+        .week-day {
+            text-align: center;
+            padding: 15px 0;
+            background: white;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #f0f2f5;
+        }
+
+        /* ЯЧЕЙКИ - АВТОМАТИЧЕСКАЯ ВЫСОТА */
+        .day-cell {
+            min-height: 150px; /* Минимальная высота */
+            background: white;
+            padding: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .day-cell.other-month {
+            background: #fafafa;
+            color: #bdc3c7;
+        }
+
+        .day-cell.today {
+            background: #e8f4ff !important;
+            border: 3px solid #3498db !important;
+        }
+
+        .day-cell.has-maintenance {
+            background: #fff9db !important;
+        }
+
+        /* Номер дня */
+        .day-number-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            min-height: 30px;
+        }
+
+        .day-number {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 16px;
+            color: #2c3e50;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .day-cell.other-month .day-number {
+            background: #f0f0f0;
+            color: #bdc3c7;
+        }
+
+        .day-cell.today .day-number {
+            background: #3498db;
+            color: white;
+        }
+
+        /* Индикатор количества ТО */
+        .maintenance-count {
+            background: #e74c3c;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* СПИСОК ТО - ПОЛНЫЙ ТЕКСТ */
+        .maintenance-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+            min-height: 0; /* Для flexbox */
+        }
+
+        .maintenance-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* Отступ между элементами */
+        }
+
+        .maintenance-item {
+            background: white;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+            font-size: 13px;
+            line-height: 1.4;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            color: #2c3e50;
+            word-break: break-word; /* Перенос длинных слов */
+            overflow-wrap: break-word; /* Перенос при нехватке места */
+            white-space: normal; /* Разрешаем перенос строк */
+            text-align: left;
+        }
+
+        .maintenance-item:hover {
+            transform: translateX(3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background: #fff7e6;
+        }
+
+        .maintenance-item strong {
+            display: block;
+            margin-bottom: 3px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        /* Если ТО много, показываем скролл */
+        .maintenance-list.many-items {
+            max-height: 300px;
+        }
+
+        /* Просроченные ТО */
+        .overdue-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .overdue-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .overdue-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .overdue-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .no-overdue {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+
+        .no-overdue i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        .overdue-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .overdue-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            color: #495057;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 14px;
+        }
+
+        .overdue-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        .overdue-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .days-overdue {
+            background: #fee;
+            color: #c0392b;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .inv-number {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1200px) {
+            .day-cell {
+                min-height: 140px;
+            }
+
+            .maintenance-item {
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .day-cell {
+                min-height: 130px;
+                padding: 10px;
+            }
+
+            .maintenance-item {
+                font-size: 11px;
+                padding: 7px 9px;
+            }
+
+            .day-number {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+
+            .calendar-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .month-nav {
+                justify-content: center;
+            }
+
+            .day-cell {
+                min-height: 120px;
+                padding: 8px;
+            }
+
+            .day-number {
+                width: 26px;
+                height: 26px;
+                font-size: 13px;
+            }
+
+            .maintenance-item {
+                font-size: 11px;
+                padding: 6px 8px;
+                margin: 0;
+            }
+
+            .maintenance-count {
+                width: 22px;
+                height: 22px;
+                font-size: 11px;
+            }
+
+            .maintenance-items {
+                gap: 6px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .day-cell {
+                min-height: 110px;
+                padding: 6px;
+            }
+
+            .day-number {
+                width: 24px;
+                height: 24px;
+                font-size: 12px;
+            }
+
+            .maintenance-item {
+                font-size: 10px;
+                padding: 5px 7px;
+            }
+
+            .week-day {
+                font-size: 13px;
+                padding: 12px 0;
+            }
+
+            .calendar-header h2 {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Полоса прокрутки */
+        .maintenance-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .maintenance-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .maintenance-list::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .maintenance-list::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Если ячейка пустая */
+        .day-cell:not(.has-maintenance) .maintenance-list {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #bdc3c7;
+            font-style: italic;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="sidebar">
+        <h2><i class="fas fa-cogs"></i> Управление ТО</h2>
+        <ul class="nav-menu">
+            <li><a href="/"><i class="fas fa-home"></i> Главная</a></li>
+            <li><a href="/machines"><i class="fas fa-industry"></i> Оборудование</a></li>
+            <li><a href="/maintenance-types"><i class="fas fa-tools"></i> Виды ТО</a></li>
+            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
+            <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
+            <li><a class="active" href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <h1><i class="fas fa-calendar-day"></i> Календарь технического обслуживания</h1>
+        </header>
+
+        <!-- Календарь -->
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <h2 th:text="${monthName + ' ' + year}"></h2>
+                <div class="month-nav">
+                    <a th:href="@{/calendar(year=${prevMonth}, month=${prevMonthNum})}"
+                       class="nav-btn" title="Предыдущий месяц">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    <a th:href="@{/calendar}" class="today-btn">Сегодня</a>
+                    <a th:href="@{/calendar(year=${nextMonth}, month=${nextMonthNum})}"
+                       class="nav-btn" title="Следующий месяц">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="calendar-grid">
+                <div class="week-days">
+                    <div class="week-day">Пн</div>
+                    <div class="week-day">Вт</div>
+                    <div class="week-day">Ср</div>
+                    <div class="week-day">Чт</div>
+                    <div class="week-day">Пт</div>
+                    <div class="week-day">Сб</div>
+                    <div class="week-day">Вс</div>
+                </div>
+
+                <div class="calendar-days">
+                    <div th:each="week : ${calendarWeeks}">
+                        <div th:each="day : ${week}"
+                             th:class="'day-cell' +
+                                     (${day.getMonthValue()} != ${month} ? ' other-month' : '') +
+                                     (${day.equals(today)} ? ' today' : '') +
+                                     (${calendarData.containsKey(day)} ? ' has-maintenance' : '')">
+
+                            <!-- Заголовок дня -->
+                            <div class="day-number-container">
+                                <!-- Номер дня -->
+                                <div class="day-number" th:text="${day.getDayOfMonth()}"></div>
+
+                                <!-- Индикатор количества ТО -->
+                                <div th:if="${calendarData.containsKey(day)}"
+                                     class="maintenance-count"
+                                     th:text="${calendarData.get(day).size()}">
+                                </div>
+                                <div th:unless="${calendarData.containsKey(day)}" style="width: 24px;"></div>
+                            </div>
+
+                            <!-- Список ТО - ПОЛНЫЙ ТЕКСТ -->
+                            <div class="maintenance-list" th:classappend="${calendarData.containsKey(day) and calendarData.get(day).size() > 3} ? 'many-items' : ''">
+                                <div class="maintenance-items">
+                                    <div th:if="${calendarData.containsKey(day)}">
+                                        <div th:each="maintenance : ${calendarData.get(day)}"
+                                             class="maintenance-item">
+                                            <!-- ПОЛНЫЙ ТЕКСТ БЕЗ ОБРЕЗАНИЯ -->
+                                            <strong th:text="${maintenance}"></strong>
+                                        </div>
+                                    </div>
+                                    <div th:unless="${calendarData.containsKey(day)}" style="text-align: center; color: #bdc3c7; font-style: italic; font-size: 12px; padding: 10px;">
+                                        Нет ТО
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Просроченные ТО -->
+        <div class="overdue-section">
+            <div class="overdue-header">
+                <i class="fas fa-exclamation-triangle" style="color: #e74c3c; font-size: 20px;"></i>
+                <h3>Просроченные ТО</h3>
+                <span th:if="${not overdue.empty}" class="overdue-badge" th:text="${overdue.size()}"></span>
+            </div>
+
+            <div th:if="${overdue.empty}" class="no-overdue">
+                <i class="fas fa-check-circle" style="color: #27ae60; font-size: 48px;"></i>
+                <p style="font-size: 16px; margin-top: 10px;">Все ТО выполнены вовремя</p>
+            </div>
+
+            <div th:unless="${overdue.empty}" style="overflow-x: auto;">
+                <table class="overdue-table">
+                    <thead>
+                    <tr>
+                        <th>Оборудование</th>
+                        <th>Инв. номер</th>
+                        <th>Вид ТО</th>
+                        <th>Дата ТО</th>
+                        <th>Дней просрочки</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${overdue}">
+                        <td>
+                            <i class="fas fa-industry" style="color: #3498db; margin-right: 10px; font-size: 16px;"></i>
+                            <strong th:text="${item.machine}"></strong>
+                        </td>
+                        <td><code class="inv-number" th:text="${item.invNumber}"></code></td>
+                        <td><strong th:text="${item.type}"></strong></td>
+                        <td th:text="${item.dueDate}"></td>
+                        <td><span class="days-overdue" th:text="${item.daysOverdue + ' дн.'}"></span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function() {
+        // Автоматическая регулировка высоты ячеек
+        function adjustCellHeights() {
+            const cells = document.querySelectorAll('.day-cell');
+
+            cells.forEach(cell => {
+                // Сбрасываем высоту
+                cell.style.height = 'auto';
+
+                // Получаем высоту содержимого
+                const contentHeight = cell.scrollHeight;
+                const minHeight = 150; // Минимальная высота
+
+                // Устанавливаем высоту
+                cell.style.height = Math.max(contentHeight, minHeight) + 'px';
+            });
+        }
+
+        // Автоматический размер текста для длинных названий
+        function adjustTextSizes() {
+            document.querySelectorAll('.maintenance-item').forEach(item => {
+                const text = item.textContent;
+                const length = text.length;
+
+                // Уменьшаем размер шрифта для очень длинного текста
+                if (length > 50) {
+                    item.style.fontSize = '11px';
+                } else if (length > 30) {
+                    item.style.fontSize = '12px';
+                } else {
+                    item.style.fontSize = '13px';
+                }
+            });
+        }
+
+        // Добавляем tooltip для очень длинного текста
+        function addTooltips() {
+            document.querySelectorAll('.maintenance-item').forEach(item => {
+                const text = item.textContent;
+
+                // Если текст длинный, добавляем всплывающую подсказку
+                if (text.length > 60) {
+                    item.title = text;
+                    item.style.cursor = 'help';
+
+                    // Показываем полный текст при клике
+                    item.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        showFullText(this.textContent);
+                    });
+                }
+            });
+        }
+
+        // Показываем полный текст в модальном окне
+        function showFullText(text) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                padding: 20px;
+            `;
+
+            modal.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                    <h3 style="margin-top: 0; color: #2c3e50; border-bottom: 2px solid #f0f2f5; padding-bottom: 15px;">
+                        <i class="fas fa-info-circle" style="color: #3498db; margin-right: 10px;"></i>
+                        Полное название ТО
+                    </h3>
+                    <div style="margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; font-size: 16px; line-height: 1.6; white-space: pre-wrap; word-break: break-word;">
+                        ${text}
+                    </div>
+                    <div style="text-align: right;">
+                        <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()"
+                                style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                            <i class="fas fa-times" style="margin-right: 8px;"></i>
+                            Закрыть
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Закрытие по клику вне модального окна
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        // Прокрутка к сегодняшнему дню
+        const todayCell = document.querySelector('.day-cell.today');
+        if (todayCell) {
+            setTimeout(() => {
+                todayCell.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center',
+                    inline: 'center'
+                });
+
+                // Подсветка сегодняшнего дня
+                todayCell.style.animation = 'pulse 2s';
+            }, 500);
+        }
+
+        // Инициализация
+        setTimeout(() => {
+            adjustCellHeights();
+            adjustTextSizes();
+            addTooltips();
+        }, 100);
+
+        // При изменении размера окна
+        window.addEventListener('resize', function() {
+            adjustCellHeights();
+            adjustTextSizes();
+        });
+
+        // Анимация пульсации
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7); }
+                70% { box-shadow: 0 0 0 10px rgba(52, 152, 219, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
+            }
+        `;
+        document.head.appendChild(style);
+    });
+    /*]]>*/
+</script>
+</body>
+</html>

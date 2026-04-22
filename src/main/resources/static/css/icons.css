@@ -1,0 +1,163 @@
+/* src/main/resources/static/css/icons.css */
+/* Иконки для разных разделов */
+.icon-machine::before { content: "🏭"; }
+.icon-type::before { content: "🔧"; }
+.icon-schedule::before { content: "📅"; }
+.icon-act::before { content: "📋"; }
+.icon-calendar::before { content: "📊"; }
+.icon-home::before { content: "🏠"; }
+
+/* Цветные иконки */
+.icon-primary { color: var(--primary-color); }
+.icon-success { color: var(--success-color); }
+.icon-warning { color: var(--warning-color); }
+.icon-danger { color: var(--danger-color); }
+.icon-accent { color: var(--accent-color); }
+
+/* Размеры иконок */
+.icon-sm { font-size: 0.875rem; }
+.icon-md { font-size: 1.25rem; }
+.icon-lg { font-size: 1.5rem; }
+.icon-xl { font-size: 2rem; }
+.icon-2xl { font-size: 3rem; }
+
+/* Анимация иконок */
+.icon-spin {
+    animation: icon-spin 2s infinite linear;
+}
+
+@keyframes icon-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.icon-pulse {
+    animation: icon-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes icon-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+.icon-bounce {
+    animation: icon-bounce 1s infinite;
+}
+
+@keyframes icon-bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Иконки в кнопках */
+.btn i {
+    margin-right: 8px;
+}
+
+/* Иконки в заголовках */
+.card h2 i {
+    color: var(--primary-color);
+    margin-right: 10px;
+}
+
+/* Иконки в таблицах */
+.data-table th i {
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
+/* Иконки статусов */
+.status-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-icon.success {
+    background: rgba(76, 201, 240, 0.2);
+    color: var(--success-color);
+}
+
+.status-icon.warning {
+    background: rgba(248, 150, 30, 0.2);
+    color: var(--warning-color);
+}
+
+.status-icon.danger {
+    background: rgba(247, 37, 133, 0.2);
+    color: var(--danger-color);
+}
+
+/* Иконки действий */
+.action-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.action-icon:hover {
+    transform: scale(1.1);
+}
+
+.action-icon.edit {
+    background: rgba(67, 97, 238, 0.1);
+    color: var(--primary-color);
+}
+
+.action-icon.delete {
+    background: rgba(247, 37, 133, 0.1);
+    color: var(--danger-color);
+}
+
+.action-icon.view {
+    background: rgba(76, 201, 240, 0.1);
+    color: var(--success-color);
+}
+
+/* Иконки статистики */
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.stat-icon.primary {
+    background: rgba(67, 97, 238, 0.2);
+    color: var(--primary-color);
+}
+
+.stat-icon.success {
+    background: rgba(76, 201, 240, 0.2);
+    color: var(--success-color);
+}
+
+.stat-icon.warning {
+    background: rgba(248, 150, 30, 0.2);
+    color: var(--warning-color);
+}
