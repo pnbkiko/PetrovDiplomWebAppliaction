@@ -166,13 +166,106 @@
             color: #7f8c8d;
         }
 
+        /* Выпадающее меню отчётов */
+        .submenu {
+            display: none;
+            padding-left: 25px;
+        }
+
+        .submenu a {
+            font-size: 13px !important;
+            padding: 8px 10px !important;
+        }
+
+        .submenu.show {
+            display: block;
+        }
+
         @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
-            }
             .sidebar {
                 position: relative;
+                width: 100%;
                 height: auto;
+                padding: 10px;
+            }
+
+            .nav-menu {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+                padding: 0 5px;
+            }
+
+            .nav-menu li {
+                margin-bottom: 0;
+            }
+
+            .nav-menu a {
+                padding: 8px 12px;
+                font-size: 13px;
+                gap: 5px;
+                white-space: nowrap;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 10px;
+            }
+
+            .welcome-section {
+                padding: 20px;
+            }
+
+            .welcome-section h1 {
+                font-size: 1.3rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .stat-title {
+                font-size: 0.75rem;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .action-card {
+                padding: 15px;
+            }
+
+            .action-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+                border-radius: 12px;
+            }
+
+            .action-title {
+                font-size: 0.9rem;
+            }
+
+            .action-desc {
+                font-size: 0.75rem;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 12px;
+                font-size: 16px;
             }
         }
     </style>
@@ -208,6 +301,14 @@
             <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
             <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
             <li><a href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+
+            <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_ENGINEER')"
+                style="border-top:1px solid #e9ecef; margin-top:10px; padding-top:10px;">
+                <a href="/reports/overdue">
+                    <i class="fas fa-file-pdf"></i> Отчёт о просроченных ТО
+                </a>
+            </li>
+
             <li><a href="/help"><i class="fas fa-question-circle"></i> Справка</a></li>
         </ul>
 
@@ -222,27 +323,6 @@
     </div>
 
     <div class="main-content">
-        <!-- Кнопка выхода (только для мобильных) -->
-        <div class="mobile-header" style="display:none; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <div style="display:flex; align-items:center; gap:10px;">
-                <div style="width:40px; height:40px; background:linear-gradient(45deg, #667eea, #764ba2); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white;">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div>
-                    <div style="font-weight:600; font-size:14px;" sec:authentication="name">user</div>
-                    <div style="font-size:11px; color:#7f8c8d;">
-                        <span sec:authorize="hasRole('ROLE_ADMIN')">Администратор</span>
-                        <span sec:authorize="hasRole('ROLE_ENGINEER')">Инженер</span>
-                        <span sec:authorize="hasRole('ROLE_OPERATOR')">Оператор</span>
-                    </div>
-                </div>
-            </div>
-            <form th:action="@{/logout}" method="post">
-                <button type="submit" style="background:#e74c3c; color:white; border:none; border-radius:8px; padding:10px 15px; cursor:pointer; font-size:14px;">
-                    <i class="fas fa-sign-out-alt"></i> Выйти
-                </button>
-            </form>
-        </div>
         <div class="dashboard">
             <div class="welcome-section">
                 <h1>👋 Добро пожаловать, <span sec:authentication="name">User</span>!</h1>
@@ -294,17 +374,7 @@
         </div>
     </div>
 </div>
-<!-- Нижнее мобильное меню -->
-<div class="bottom-nav" style="display:none;">
-    <div class="nav-grid">
-        <a href="/" class="active"><i class="fas fa-home"></i><span>Главная</span></a>
-        <a href="/machines"><i class="fas fa-industry"></i><span>Оборуд.</span></a>
-        <a href="/maintenance-types"><i class="fas fa-tools"></i><span>Виды ТО</span></a>
-        <a href="/schedule"><i class="fas fa-calendar-alt"></i><span>График</span></a>
-        <a href="/calendar"><i class="fas fa-calendar-day"></i><span>Календарь</span></a>
-        <a href="/help"><i class="fas fa-question-circle"></i><span>Справка</span></a>
-    </div>
-</div>
+
 
 </body>
 </html>

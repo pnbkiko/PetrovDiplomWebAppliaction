@@ -103,6 +103,15 @@
             <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
             <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
             <li><a href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+
+
+            <li sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_ENGINEER')"
+                style="border-top:1px solid #e9ecef; margin-top:10px; padding-top:10px;">
+                <a href="/reports/overdue">
+                    <i class="fas fa-file-pdf"></i> Отчёт о просроченных ТО
+                </a>
+            </li>
+
             <li><a href="/help"><i class="fas fa-question-circle"></i> Справка</a></li>
         </ul>
 
@@ -265,6 +274,7 @@
         <a href="/maintenance-types"><i class="fas fa-tools"></i><span>Виды ТО</span></a>
         <a href="/schedule"><i class="fas fa-calendar-alt"></i><span>График</span></a>
         <a href="/calendar"><i class="fas fa-calendar-day"></i><span>Календарь</span></a>
+
         <a href="/help"><i class="fas fa-question-circle"></i><span>Справка</span></a>
     </div>
 </div>
@@ -304,5 +314,6 @@
         }
     });
 </script>
+
 </body>
 </html>
