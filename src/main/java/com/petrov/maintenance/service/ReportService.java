@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -114,7 +115,12 @@ public class ReportService {
         response.setContentType("application/pdf");
         String filename = "Отчет_просроченные_ТО_" +
                 LocalDate.now().format(DateTimeFormatter.ofPattern("dd_MM_yyyy")) + ".pdf";
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+
+        String encodedFilename = URLEncoder.encode(filename, "UTF-8")
+                .replace("+", "%20");
+
+        response.setHeader("Content-Disposition",
+                "attachment; filename*=UTF-8''" + encodedFilename);
 
         try {
             Document document = new Document();
