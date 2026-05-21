@@ -1,0 +1,352 @@
+<!-- src/main/resources/templates/maintenance-types.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">я
+    <title>Виды ТО | Система ТО</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .content-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .search-filter-bar {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .search-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+        }
+
+        .filter-select {
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+            min-width: 200px;
+            cursor: pointer;
+        }
+
+        .results-count {
+            background: #9b59b6;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .clear-filters {
+            padding: 10px 15px;
+            background: #f0f2f5;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #7f8c8d;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .clear-filters:hover {
+            background: #e9ecef;
+            color: #2c3e50;
+        }
+
+        .interval-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .interval-daily { background: #ffe0e0; color: #e74c3c; }
+        .interval-weekly { background: #ffeaa7; color: #f39c12; }
+        .interval-monthly { background: #d4edff; color: #2980b9; }
+        .interval-quarterly { background: #e8daef; color: #8e44ad; }
+        .interval-annual { background: #d5f5e3; color: #27ae60; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0 10px;
+            flex: 1;
+        }
+
+        .nav-menu li {
+            margin-bottom: 5px;
+        }
+
+        .nav-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            color: #212529;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-menu a:hover {
+            background: #f0f2ff;
+            color: #4361ee;
+        }
+
+        .nav-menu a.active {
+            background: #4361ee;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .search-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="sidebar">
+        <h2><i class="fas fa-cogs"></i> Управление ТО</h2>
+
+        <div style="padding: 15px 20px; border-bottom: 1px solid #e9ecef; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 40px; height: 40px; background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <div style="font-size: 14px; font-weight: 600; color: #2c3e50;" sec:authentication="name">user</div>
+                    <div style="font-size: 11px; color: #7f8c8d;">
+                        <span sec:authorize="hasRole('ROLE_ADMIN')">👑 Администратор</span>
+                        <span sec:authorize="hasRole('ROLE_ENGINEER')">🔧 Инженер</span>
+                        <span sec:authorize="hasRole('ROLE_OPERATOR')">👁️ Оператор</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li><a href="/"><i class="fas fa-home"></i> Главная</a></li>
+            <li><a href="/machines"><i class="fas fa-industry"></i> Оборудование</a></li>
+            <li><a class="active" href="/maintenance-types"><i class="fas fa-tools"></i> Виды ТО</a></li>
+            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
+            <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
+            <li><a href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+            <li><a href="/help"><i class="fas fa-question-circle"></i> Справка</a></li>
+        </ul>
+
+        <div style="padding: 20px; border-top: 1px solid #e9ecef;">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <h1><i class="fas fa-tools"></i> Виды технического обслуживания</h1>
+        </header>
+
+        <div class="content-vertical">
+            <!-- Форма добавления (только ADMIN) -->
+            <div class="card" sec:authorize="hasRole('ROLE_ADMIN')">
+                <h2><i class="fas fa-plus-circle"></i> Добавить вид ТО</h2>
+                <form th:action="@{/maintenance-types/add}" method="post">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Название вида ТО *</label>
+                            <input type="text" name="name" placeholder="Например: Ежемесячное ТО" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Интервал (дней) *</label>
+                            <input type="number" name="intervalDays" placeholder="30" required min="1" max="365">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">
+                        <i class="fas fa-save"></i> Сохранить
+                    </button>
+                </form>
+            </div>
+
+            <!-- Список видов ТО -->
+            <div class="card">
+                <h2><i class="fas fa-list"></i> Список видов ТО</h2>
+
+                <div class="search-filter-bar">
+                    <div class="search-row">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchInput" placeholder="Поиск по названию...">
+                        </div>
+                        <span class="results-count">
+                            Всего: <strong th:text="${types != null ? types.size() : 0}">0</strong>
+                        </span>
+                        <button class="clear-filters" id="clearFilters">
+                            <i class="fas fa-times"></i> Сбросить
+                        </button>
+                    </div>
+                </div>
+
+                <div th:if="${types == null or types.empty}" class="no-results">
+                    <i class="fas fa-tools fa-3x" style="margin-bottom: 15px; opacity: 0.3;"></i>
+                    <p>Виды ТО не найдены</p>
+                </div>
+
+                <div th:if="${types != null and not types.empty}" style="overflow-x: auto;">
+                    <table class="data-table" id="typesTable">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Интервал (дней)</th>
+                            <th>Частота в год</th>
+                            <th>Действия</th>
+                        </tr>
+                        </thead>
+                        <tbody id="typesTableBody">
+                        <tr th:each="type : ${types}">
+                            <td th:text="${type.id}">1</td>
+                            <td><strong th:text="${type.name}">Название</strong></td>
+                            <td>
+                                <span class="interval-badge"
+                                      th:classappend="${type.intervalDays == 1} ? 'interval-daily' :
+                                                      (${type.intervalDays <= 7} ? 'interval-weekly' :
+                                                       (${type.intervalDays <= 30} ? 'interval-monthly' :
+                                                        (${type.intervalDays <= 90} ? 'interval-quarterly' : 'interval-annual')))"
+                                      th:text="${type.intervalDays} + ' дн.'"></span>
+                            </td>
+                            <td th:with="perYear=${365.0 / type.intervalDays}"
+                                th:text="${#numbers.formatDecimal(perYear, 1, 1) + ' раз'}">12 раз</td>
+                            <td>
+                                <form sec:authorize="hasRole('ROLE_ADMIN')"
+                                      th:action="@{/maintenance-types/delete/{id}(id=${type.id})}"
+                                      method="post" style="display:inline;">
+                                    <button type="submit" class="btn-delete-sm" onclick="return confirm('Удалить?')">
+                                        <i class="fas fa-trash-alt"></i> Удалить
+                                    </button>
+                                </form>
+                                <span sec:authorize="!hasRole('ROLE_ADMIN')" style="color:#bdc3c7;font-size:12px;">
+                                    <i class="fas fa-lock"></i>
+                                    Нет прав
+                                </span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="bottom-nav" style="display:none;">
+    <div class="nav-grid">
+        <a href="/"><i class="fas fa-home"></i><span>Главная</span></a>
+        <a href="/machines"><i class="fas fa-industry"></i><span>Оборуд.</span></a>
+        <a href="/maintenance-types" class="active"><i class="fas fa-tools"></i><span>Виды ТО</span></a>
+        <a href="/schedule"><i class="fas fa-calendar-alt"></i><span>График</span></a>
+        <a href="/calendar"><i class="fas fa-calendar-day"></i><span>Календарь</span></a>
+        <a href="/help"><i class="fas fa-question-circle"></i><span>Справка</span></a>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const clearFilters = document.getElementById('clearFilters');
+        const tableBody = document.getElementById('typesTableBody');
+
+        function filterTable() {
+            if (!tableBody) return;
+            const searchTerm = (searchInput?.value || '').toLowerCase();
+            const rows = tableBody.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = (searchTerm === '' || text.includes(searchTerm)) ? '' : 'none';
+            });
+        }
+
+        if (searchInput) searchInput.addEventListener('input', filterTable);
+        if (clearFilters) clearFilters.addEventListener('click', () => {
+            if (searchInput) searchInput.value = '';
+            filterTable();
+        });
+    });
+</script>
+</body>
+</html>

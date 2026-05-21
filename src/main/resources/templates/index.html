@@ -1,0 +1,310 @@
+<!-- src/main/resources/templates/index.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель управления ТО | Система ТО</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .sidebar {
+            width: 250px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0 10px;
+            flex: 1;
+        }
+
+        .nav-menu li {
+            margin-bottom: 5px;
+        }
+
+        .nav-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            color: #212529;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-menu a:hover {
+            background: #f0f2ff;
+            color: #4361ee;
+        }
+
+        .nav-menu a.active {
+            background: #4361ee;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            padding: 20px;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .welcome-section h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border-left: 5px solid;
+        }
+
+        .stat-card.overdue { border-left-color: #e74c3c; }
+        .stat-card.machines { border-left-color: #3498db; }
+        .stat-card.types { border-left-color: #9b59b6; }
+        .stat-card.schedule { border-left-color: #2ecc71; }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .action-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            display: block;
+        }
+
+        .action-card:hover {
+            background: white;
+            border-color: #3498db;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.2);
+        }
+
+        .action-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .action-card:nth-child(1) .action-icon { background: #3498db; }
+        .action-card:nth-child(2) .action-icon { background: #9b59b6; }
+        .action-card:nth-child(3) .action-icon { background: #2ecc71; }
+        .action-card:nth-child(4) .action-icon { background: #e74c3c; }
+
+        .action-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .action-desc {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+            }
+            .sidebar {
+                position: relative;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="sidebar">
+        <h2><i class="fas fa-cogs"></i> Управление ТО</h2>
+
+        <!-- Информация о пользователе -->
+        <div style="padding: 15px 20px; border-bottom: 1px solid #e9ecef; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 40px; height: 40px; background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 14px; font-weight: 600; color: #2c3e50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        <span sec:authentication="name">user</span>
+                    </div>
+                    <div style="font-size: 11px; color: #7f8c8d;">
+                        <span sec:authorize="hasRole('ROLE_ADMIN')">👑 Администратор</span>
+                        <span sec:authorize="hasRole('ROLE_ENGINEER')">🔧 Инженер</span>
+                        <span sec:authorize="hasRole('ROLE_OPERATOR')">👁️ Оператор</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li><a class="active" href="/"><i class="fas fa-home"></i> Главная</a></li>
+            <li><a href="/machines"><i class="fas fa-industry"></i> Оборудование</a></li>
+            <li><a href="/maintenance-types"><i class="fas fa-tools"></i> Виды ТО</a></li>
+            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
+            <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
+            <li><a href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+            <li><a href="/help"><i class="fas fa-question-circle"></i> Справка</a></li>
+        </ul>
+
+        <!-- Кнопка выхода -->
+        <div style="padding: 20px; border-top: 1px solid #e9ecef;">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Кнопка выхода (только для мобильных) -->
+        <div class="mobile-header" style="display:none; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:40px; height:40px; background:linear-gradient(45deg, #667eea, #764ba2); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <div style="font-weight:600; font-size:14px;" sec:authentication="name">user</div>
+                    <div style="font-size:11px; color:#7f8c8d;">
+                        <span sec:authorize="hasRole('ROLE_ADMIN')">Администратор</span>
+                        <span sec:authorize="hasRole('ROLE_ENGINEER')">Инженер</span>
+                        <span sec:authorize="hasRole('ROLE_OPERATOR')">Оператор</span>
+                    </div>
+                </div>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" style="background:#e74c3c; color:white; border:none; border-radius:8px; padding:10px 15px; cursor:pointer; font-size:14px;">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </form>
+        </div>
+        <div class="dashboard">
+            <div class="welcome-section">
+                <h1>👋 Добро пожаловать, <span sec:authentication="name">User</span>!</h1>
+                <p>Система управления техническим обслуживанием оборудования</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card overdue">
+                    <div class="stat-title">Просроченные ТО</div>
+                    <div class="stat-value" th:text="${overdueCount}">0</div>
+                </div>
+                <div class="stat-card machines">
+                    <div class="stat-title">Всего оборудования</div>
+                    <div class="stat-value" th:text="${machineCount}">0</div>
+                </div>
+                <div class="stat-card types">
+                    <div class="stat-title">Видов ТО</div>
+                    <div class="stat-value" th:text="${typesCount}">0</div>
+                </div>
+                <div class="stat-card schedule">
+                    <div class="stat-title">Запланировано на месяц</div>
+                    <div class="stat-value" th:text="${scheduledCount}">0</div>
+                </div>
+            </div>
+
+            <h2 style="margin-bottom: 20px;">⚡ Быстрые действия</h2>
+            <div class="actions-grid">
+                <a href="/machines" class="action-card">
+                    <div class="action-icon"><i class="fas fa-plus"></i></div>
+                    <div class="action-title">Добавить оборудование</div>
+                    <div class="action-desc">Зарегистрируйте новый станок</div>
+                </a>
+                <a href="/schedule" class="action-card">
+                    <div class="action-icon"><i class="fas fa-calendar-plus"></i></div>
+                    <div class="action-title">Запланировать ТО</div>
+                    <div class="action-desc">Добавьте запись в график</div>
+                </a>
+                <a href="/maintenance-acts" class="action-card">
+                    <div class="action-icon"><i class="fas fa-file-signature"></i></div>
+                    <div class="action-title">Создать акт ТО</div>
+                    <div class="action-desc">Зафиксируйте выполнение</div>
+                </a>
+                <a href="/calendar" class="action-card">
+                    <div class="action-icon"><i class="fas fa-calendar-day"></i></div>
+                    <div class="action-title">Календарь ТО</div>
+                    <div class="action-desc">Просмотрите расписание</div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Нижнее мобильное меню -->
+<div class="bottom-nav" style="display:none;">
+    <div class="nav-grid">
+        <a href="/" class="active"><i class="fas fa-home"></i><span>Главная</span></a>
+        <a href="/machines"><i class="fas fa-industry"></i><span>Оборуд.</span></a>
+        <a href="/maintenance-types"><i class="fas fa-tools"></i><span>Виды ТО</span></a>
+        <a href="/schedule"><i class="fas fa-calendar-alt"></i><span>График</span></a>
+        <a href="/calendar"><i class="fas fa-calendar-day"></i><span>Календарь</span></a>
+        <a href="/help"><i class="fas fa-question-circle"></i><span>Справка</span></a>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!-- src/main/resources/templates/profile.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль | Система ТО</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+<div class="container">
+    <div class="sidebar">
+        <h2><i class="fas fa-cogs"></i> Управление ТО</h2>
+        <ul class="nav-menu">
+            <li><a href="/"><i class="fas fa-home"></i> Главная</a></li>
+            <li><a href="/machines"><i class="fas fa-industry"></i> Оборудование</a></li>
+            <li><a href="/maintenance-types"><i class="fas fa-tools"></i> Виды ТО</a></li>
+            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
+            <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
+            <li><a href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+            <li><a href="/help"><i class="fas fa-question-circle"></i> Справка</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <h1><i class="fas fa-user-circle"></i> Профиль пользователя</h1>
+        </header>
+
+        <div class="card">
+            <div style="text-align: center; padding: 30px;">
+                <div style="width: 100px; height: 100px; background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 40px; color: white;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h2 th:text="${user.fullName}" style="color: #2c3e50; margin-bottom: 5px;">ФИО</h2>
+                <p th:text="${user.email}" style="color: #7f8c8d; margin-bottom: 20px;">email</p>
+
+                <div style="display: inline-block; padding: 6px 15px; border-radius: 20px; font-size: 14px; font-weight: 600;"
+                     th:classappend="${user.role.name == 'ROLE_ADMIN'} ? 'admin' : (${user.role.name == 'ROLE_ENGINEER'} ? 'engineer' : 'operator')">
+                    <span th:text="${user.role.description}">Роль</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+                <p><strong>Имя пользователя:</strong> <span th:text="${user.username}"></span></p>
+                <p><strong>Дата регистрации:</strong> <span th:text="${user.createdAt}"></span></p>
+                <p><strong>Последний вход:</strong> <span th:text="${user.lastLogin}"></span></p>
+            </div>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <a href="/" class="btn">На главную</a>
+                <a href="/logout" class="btn" style="background: #e74c3c;">Выйти</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

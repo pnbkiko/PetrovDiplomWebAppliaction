@@ -1,0 +1,308 @@
+<!-- src/main/resources/templates/machines.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>Оборудование | Система ТО</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .content-vertical { display: flex; flex-direction: column; gap: 20px; }
+        .search-filter-bar {
+            background: white; padding: 15px 20px; border-radius: 12px;
+            margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .search-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+        .search-box { flex: 1; min-width: 200px; position: relative; }
+        .search-box input {
+            width: 100%; padding: 12px 15px 12px 45px;
+            border: 2px solid #e9ecef; border-radius: 10px; font-size: 14px;
+        }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #7f8c8d; }
+        .filter-select {
+            padding: 12px 15px; border: 2px solid #e9ecef;
+            border-radius: 10px; font-size: 14px; background: white;
+            min-width: 200px; cursor: pointer;
+        }
+        .results-count {
+            background: #3498db; color: white; padding: 8px 15px;
+            border-radius: 20px; font-size: 13px; font-weight: 600;
+        }
+        .clear-filters {
+            padding: 10px 15px; background: #f0f2f5; border: none;
+            border-radius: 8px; cursor: pointer; color: #7f8c8d;
+            font-size: 13px; display: flex; align-items: center; gap: 5px;
+        }
+        .machine-type-badge {
+            display: inline-block; padding: 4px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 600; background: #e8f4ff; color: #3498db;
+        }
+        .modification-badge {
+            display: inline-block; padding: 3px 10px; border-radius: 12px;
+            font-size: 12px; font-weight: 600; background: #f0fff4;
+            color: #27ae60; border: 1px solid #27ae60;
+        }
+        .year-badge {
+            display: inline-block; padding: 3px 10px; border-radius: 12px;
+            font-size: 12px; font-weight: 600; background: #fff9db; color: #f39c12;
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .no-results { text-align: center; padding: 30px; color: #7f8c8d; }
+
+        /* Боковое меню */
+        .sidebar {
+            width: 250px; background: white; padding: 20px 0;
+            position: fixed; height: 100vh; overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column;
+        }
+        .nav-menu { list-style: none; padding: 0 10px; flex: 1; }
+        .nav-menu li { margin-bottom: 5px; }
+        .nav-menu a {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 15px; color: #212529; text-decoration: none;
+            border-radius: 8px; transition: all 0.3s; font-weight: 500;
+        }
+        .nav-menu a:hover { background: #f0f2ff; color: #4361ee; }
+        .nav-menu a.active { background: #4361ee; color: white; }
+
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .search-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="sidebar">
+        <h2><i class="fas fa-cogs"></i> Управление ТО</h2>
+
+        <div style="padding: 15px 20px; border-bottom: 1px solid #e9ecef; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 40px; height: 40px; background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <div style="font-size: 14px; font-weight: 600; color: #2c3e50;" sec:authentication="name">user</div>
+                    <div style="font-size: 11px; color: #7f8c8d;">
+                        <span sec:authorize="hasRole('ROLE_ADMIN')">👑 Администратор</span>
+                        <span sec:authorize="hasRole('ROLE_ENGINEER')">🔧 Инженер</span>
+                        <span sec:authorize="hasRole('ROLE_OPERATOR')">👁️ Оператор</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li><a href="/"><i class="fas fa-home"></i> Главная</a></li>
+            <li><a class="active" href="/machines"><i class="fas fa-industry"></i> Оборудование</a></li>
+            <li><a href="/maintenance-types"><i class="fas fa-tools"></i> Виды ТО</a></li>
+            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
+            <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
+            <li><a href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+            <li><a href="/help"><i class="fas fa-question-circle"></i> Справка</a></li>
+        </ul>
+
+        <div style="padding: 20px; border-top: 1px solid #e9ecef;">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <h1><i class="fas fa-industry"></i> Управление оборудованием</h1>
+        </header>
+
+        <div class="content-vertical">
+            <!-- Форма -->
+            <div class="card" sec:authorize="hasRole('ROLE_ADMIN')">
+                <h2><i class="fas fa-plus-circle"></i> Добавить оборудование</h2>
+                <form th:action="@{/machines/add}" method="post">
+                    <div class="form-group">
+                        <label>Тип оборудования *</label>
+                        <select name="typeId" required>
+                            <option value="">Выберите тип</option>
+                            <option th:each="t : ${machineTypes}" th:value="${t.id}" th:text="${t.name}"></option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Модель *</label>
+                            <input type="text" name="model" placeholder="CTX-500" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Модификация</label>
+                            <input type="text" name="modification" placeholder="1-е поколение">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Производитель *</label>
+                            <input type="text" name="manufacturer" placeholder="DMG MORI" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Год выпуска</label>
+                            <input type="number" name="manufacturingYear" placeholder="2024" min="1950" max="2030">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Серийный номер</label>
+                            <input type="text" name="serialNumber" placeholder="SN-XXXX">
+                        </div>
+                        <div class="form-group">
+                            <label>Инвентарный номер *</label>
+                            <input type="text" name="invNumber" placeholder="INV-001" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Дата ввода *</label>
+                        <input type="date" name="commissionedAt" required>
+                    </div>
+                    <button type="submit" class="btn">
+                        <i class="fas fa-save"></i> Сохранить
+                    </button>
+                </form>
+            </div>
+
+            <!-- Таблица -->
+            <div class="card">
+                <h2><i class="fas fa-list"></i> Список оборудования</h2>
+
+                <div class="search-filter-bar">
+                    <div class="search-row">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchInput" placeholder="Поиск...">
+                        </div>
+                        <select class="filter-select" id="typeFilter">
+                            <option value="">Все типы</option>
+                            <option th:each="t : ${machineTypes}" th:value="${t.name}" th:text="${t.name}"></option>
+                        </select>
+                        <span class="results-count">
+                            Всего: <strong th:text="${machines != null ? machines.size() : 0}">0</strong>
+                        </span>
+                        <button class="clear-filters" id="clearFilters">
+                            <i class="fas fa-times"></i> Сбросить
+                        </button>
+                    </div>
+                </div>
+
+                <div th:if="${machines == null or machines.empty}" class="no-results">
+                    <i class="fas fa-industry fa-3x" style="margin-bottom: 15px; opacity: 0.3;"></i>
+                    <p>Оборудование не найдено</p>
+                </div>
+
+                <div th:if="${machines != null and not machines.empty}" style="overflow-x: auto;">
+                    <table class="data-table" id="machinesTable">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Тип</th>
+                            <th>Модель</th>
+                            <th>Модификация</th>
+                            <th>Производитель</th>
+                            <th>Год</th>
+                            <th>Сер.номер</th>
+                            <th>Инв.номер</th>
+                            <th>Дата ввода</th>
+                            <th>Действия</th>
+                        </tr>
+                        </thead>
+                        <tbody id="machinesTableBody">
+                        <tr th:each="m : ${machines}">
+                            <td th:text="${m.id}">1</td>
+                            <td><span class="machine-type-badge" th:text="${m.machineType?.name}">Тип</span></td>
+                            <td><strong th:text="${m.model}">Модель</strong></td>
+                            <td>
+                                <span th:if="${m.modification != null and !m.modification.isEmpty()}"
+                                      class="modification-badge" th:text="${m.modification}"></span>
+                                <span th:if="${m.modification == null or m.modification.isEmpty()}"
+                                      style="color:#bdc3c7;">—</span>
+                            </td>
+                            <td th:text="${m.manufacturer}">Производитель</td>
+                            <td>
+                                <span th:if="${m.manufacturingYear != null}" class="year-badge"
+                                      th:text="${m.manufacturingYear} + ' г.'"></span>
+                                <span th:if="${m.manufacturingYear == null}" style="color:#bdc3c7;">—</span>
+                            </td>
+                            <td><code th:text="${m.serialNumber != null ? m.serialNumber : '—'}">SN</code></td>
+                            <td><code th:text="${m.invNumber}">INV</code></td>
+                            <td th:text="${m.commissionedAt}">Дата</td>
+                            <td>
+                                <form sec:authorize="hasRole('ROLE_ADMIN')"
+                                      th:action="'/machines/delete/' + ${m.id}"
+                                      method="post" style="display:inline;">
+                                    <button type="submit" class="btn-delete-sm"
+                                            onclick="return confirm('Удалить оборудование?')">
+                                        <i class="fas fa-trash-alt"></i> Удалить
+                                    </button>
+                                </form>
+                                <span sec:authorize="!hasRole('ROLE_ADMIN')"
+                                      style="color:#bdc3c7;font-size:12px;">
+                                    <i class="fas fa-lock"></i> Нет прав
+                                </span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="bottom-nav" style="display:none;">
+    <div class="nav-grid">
+        <a href="/"><i class="fas fa-home"></i><span>Главная</span></a>
+        <a href="/machines" class="active"><i class="fas fa-industry"></i><span>Оборуд.</span></a>
+        <a href="/maintenance-types"><i class="fas fa-tools"></i><span>Виды ТО</span></a>
+        <a href="/schedule"><i class="fas fa-calendar-alt"></i><span>График</span></a>
+        <a href="/calendar"><i class="fas fa-calendar-day"></i><span>Календарь</span></a>
+        <a href="/help"><i class="fas fa-question-circle"></i><span>Справка</span></a>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const typeFilter = document.getElementById('typeFilter');
+        const clearFilters = document.getElementById('clearFilters');
+        const tableBody = document.getElementById('machinesTableBody');
+
+        function filterTable() {
+            if (!tableBody) return;
+            const searchTerm = (searchInput?.value || '').toLowerCase();
+            const filterType = (typeFilter?.value || '').toLowerCase();
+            const rows = tableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const matchesSearch = searchTerm === '' || text.includes(searchTerm);
+                const matchesType = filterType === '' || text.includes(filterType);
+                row.style.display = (matchesSearch && matchesType) ? '' : 'none';
+            });
+        }
+
+        if (searchInput) searchInput.addEventListener('input', filterTable);
+        if (typeFilter) typeFilter.addEventListener('change', filterTable);
+        if (clearFilters) clearFilters.addEventListener('click', function() {
+            if (searchInput) searchInput.value = '';
+            if (typeFilter) typeFilter.value = '';
+            filterTable();
+        });
+
+        const dateInput = document.querySelector('input[type="date"]');
+        if (dateInput && !dateInput.value) {
+            dateInput.value = new Date().toISOString().split('T')[0];
+        }
+    });
+</script>
+</body>
+</html>

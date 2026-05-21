@@ -1,0 +1,187 @@
+<!-- src/main/resources/templates/calendar.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Календарь ТО | Система ТО</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+</head>
+<body>
+<div class="container">
+    <!-- Боковое меню -->
+    <div class="sidebar">
+        <h2><i class="fas fa-cogs"></i> Управление ТО</h2>
+
+        <div style="padding: 15px 20px; border-bottom: 1px solid #e9ecef; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 40px; height: 40px; background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <div style="font-size: 14px; font-weight: 600; color: #2c3e50;" sec:authentication="name">user</div>
+                    <div style="font-size: 11px; color: #7f8c8d;">
+                        <span sec:authorize="hasRole('ROLE_ADMIN')">👑 Администратор</span>
+                        <span sec:authorize="hasRole('ROLE_ENGINEER')">🔧 Инженер</span>
+                        <span sec:authorize="hasRole('ROLE_OPERATOR')">👁️ Оператор</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li><a href="/"><i class="fas fa-home"></i> Главная</a></li>
+            <li><a href="/machines"><i class="fas fa-industry"></i> Оборудование</a></li>
+            <li><a href="/maintenance-types"><i class="fas fa-tools"></i> Виды ТО</a></li>
+            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
+            <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
+            <li><a class="active" href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+            <li><a href="/help"><i class="fas fa-question-circle"></i> Справка</a></li>
+        </ul>
+
+        <div style="padding: 20px; border-top: 1px solid #e9ecef;">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <h1><i class="fas fa-calendar-day"></i> Календарь технического обслуживания</h1>
+        </header>
+
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <h2 th:text="${monthName + ' ' + year}">Месяц Год</h2>
+                <div class="month-nav">
+                    <a th:href="@{/calendar(year=${prevMonth}, month=${prevMonthNum})}" class="nav-btn">◀</a>
+                    <a th:href="@{/calendar}" class="today-btn">Сегодня</a>
+                    <a th:href="@{/calendar(year=${nextMonth}, month=${nextMonthNum})}" class="nav-btn">▶</a>
+                </div>
+            </div>
+
+            <div class="week-days">
+                <div class="week-day">Пн</div><div class="week-day">Вт</div>
+                <div class="week-day">Ср</div><div class="week-day">Чт</div>
+                <div class="week-day">Пт</div><div class="week-day">Сб</div>
+                <div class="week-day">Вс</div>
+            </div>
+
+            <div class="calendar-days">
+                <th:block th:each="week : ${calendarWeeks}">
+                    <div th:each="day : ${week}"
+                         th:class="'day-cell' +
+                                 (${day.monthValue != month} ? ' other-month' : '') +
+                                 (${day.equals(today)} ? ' today' : '') +
+                                 (${calendarData.containsKey(day)} ? ' has-maintenance' : '')"
+                         th:data-date="${day}">
+                        <div class="day-number" th:text="${day.dayOfMonth}"></div>
+                        <div class="maintenance-list">
+                            <th:block th:if="${calendarData.containsKey(day)}">
+                                <div th:each="m : ${calendarData.get(day)}" class="maintenance-item" th:text="${m}"></div>
+                            </th:block>
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+
+        <div class="overdue-section">
+            <h3 style="margin-bottom: 15px;">⚠️ Просроченные ТО</h3>
+            <div th:if="${overdue == null or overdue.empty}" style="text-align:center;padding:30px;color:#7f8c8d;">
+                <p>✅ Все ТО выполнены вовремя</p>
+            </div>
+            <div th:if="${overdue != null and not overdue.empty}" style="overflow-x:auto;">
+                <table class="overdue-table">
+                    <thead>
+                    <tr>
+                        <th>Оборудование</th>
+                        <th>Инв.номер</th>
+                        <th>Вид ТО</th>
+                        <th>Дата</th>
+                        <th>Просрочка</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${overdue}">
+                        <td th:text="${item.machine}"></td>
+                        <td th:text="${item.invNumber}"></td>
+                        <td th:text="${item.type}"></td>
+                        <td th:text="${item.dueDate}"></td>
+                        <td><span class="days-overdue" th:text="${item.daysOverdue + ' дн.'}"></span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно -->
+<div id="dayModal" class="day-modal">
+    <div class="day-modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 id="modalTitle" style="margin:0;">Дата</h3>
+            <button onclick="closeModal()" style="background:none; border:none; font-size:24px; cursor:pointer; color:#999;">&times;</button>
+        </div>
+        <div id="modalContent"></div>
+    </div>
+</div>
+
+<!-- Нижнее мобильное меню -->
+<div class="bottom-nav" style="display:none;">
+    <div class="nav-grid">
+        <a href="/"><i class="fas fa-home"></i><span>Главная</span></a>
+        <a href="/machines"><i class="fas fa-industry"></i><span>Оборуд.</span></a>
+        <a href="/maintenance-types"><i class="fas fa-tools"></i><span>Виды ТО</span></a>
+        <a href="/schedule"><i class="fas fa-calendar-alt"></i><span>График</span></a>
+        <a href="/calendar" class="active"><i class="fas fa-calendar-day"></i><span>Календарь</span></a>
+        <a href="/help"><i class="fas fa-question-circle"></i><span>Справка</span></a>
+    </div>
+</div>
+
+<script>
+    // Клик по ячейке календаря
+    document.querySelectorAll('.day-cell.has-maintenance').forEach(function(cell) {
+        cell.addEventListener('click', function() {
+            var date = this.getAttribute('data-date');
+            var items = this.querySelectorAll('.maintenance-item');
+            var events = [];
+            items.forEach(function(item) {
+                events.push(item.textContent.trim());
+            });
+
+            document.getElementById('modalTitle').textContent = '📅 ' + date;
+
+            if (events.length > 0) {
+                var html = '';
+                events.forEach(function(e) {
+                    html += '<div style="background:#f8f9fa; padding:12px; margin-bottom:6px; border-radius:8px; border-left:4px solid #f39c12;">' + e + '</div>';
+                });
+                document.getElementById('modalContent').innerHTML = html;
+            } else {
+                document.getElementById('modalContent').innerHTML = '<div style="text-align:center; padding:20px; color:#7f8c8d;">Нет запланированных ТО</div>';
+            }
+
+            document.getElementById('dayModal').style.display = 'flex';
+        });
+    });
+
+    function closeModal() {
+        document.getElementById('dayModal').style.display = 'none';
+    }
+
+    // Закрытие по клику на фон
+    document.getElementById('dayModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+</script>
+</body>
+</html>

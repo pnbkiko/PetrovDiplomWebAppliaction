@@ -1,0 +1,698 @@
+<!-- src/main/resources/templates/help.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Справка | Система ТО</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .help-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .help-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .help-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .help-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .help-search {
+            margin-top: 20px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .help-search input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 30px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 16px;
+        }
+
+        .help-search input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .help-nav {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .help-nav-btn {
+            padding: 10px 20px;
+            background: #f0f2f5;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c3e50;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .help-nav-btn:hover, .help-nav-btn.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .help-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            display: none;
+        }
+
+        .help-section.active {
+            display: block;
+        }
+
+        .help-section h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .help-section h3 {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            margin: 20px 0 15px 0;
+        }
+
+        .help-section p {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .help-section ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        .help-section li {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 8px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+            margin: 20px 0;
+        }
+
+        .info-card.warning {
+            border-left-color: #f39c12;
+            background: #fff9db;
+        }
+
+        .info-card.tip {
+            border-left-color: #27ae60;
+            background: #f0fff4;
+        }
+
+        .field-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .field-table th {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .field-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .field-table .required {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .field-table .optional {
+            color: #7f8c8d;
+        }
+
+        .faq-item {
+            margin-bottom: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            cursor: pointer;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-question:hover {
+            background: #e8f4ff;
+        }
+
+        .faq-answer {
+            padding: 20px;
+            display: none;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .faq-item.open .faq-answer {
+            display: block;
+        }
+
+        .faq-item.open .faq-question {
+            background: #3498db;
+            color: white;
+        }
+
+        .shortcut-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .shortcut-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .shortcut-key {
+            display: inline-block;
+            background: #2c3e50;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .help-nav {
+                flex-direction: column;
+            }
+            .help-nav-btn {
+                justify-content: center;
+            }
+            .help-header {
+                padding: 30px 20px;
+            }
+            .help-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="sidebar">
+        <h2><i class="fas fa-cogs"></i> Управление ТО</h2>
+
+        <!-- Информация о пользователе -->
+        <div style="padding: 15px 20px; border-bottom: 1px solid #e9ecef; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 40px; height: 40px; background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 14px; font-weight: 600; color: #2c3e50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        <span sec:authentication="name">user</span>
+                    </div>
+                    <div style="font-size: 11px; color: #7f8c8d;">
+                        <span sec:authorize="hasRole('ROLE_ADMIN')">👑 Администратор</span>
+                        <span sec:authorize="hasRole('ROLE_ENGINEER')">🔧 Инженер</span>
+                        <span sec:authorize="hasRole('ROLE_OPERATOR')">👁️ Оператор</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li><a href="/"><i class="fas fa-home"></i> Главная</a></li>
+            <li><a href="/machines"><i class="fas fa-industry"></i> Оборудование</a></li>
+            <li><a href="/maintenance-types"><i class="fas fa-tools"></i> Виды ТО</a></li>
+            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
+            <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
+            <li><a href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+            <li><a href="/help" class="active"><i class="fas fa-question-circle"></i> Справка</a></li>
+        </ul>
+
+        <!-- Кнопка выхода -->
+        <div style="padding: 20px; border-top: 1px solid #e9ecef;">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="help-container">
+            <div class="help-header">
+                <h1><i class="fas fa-book-open"></i> Справка по системе ТО</h1>
+                <p>Руководство пользователя системы управления техническим обслуживанием оборудования</p>
+                <div class="help-search">
+                    <input type="text" id="helpSearch" placeholder="Поиск по справке...">
+                </div>
+            </div>
+
+            <div class="help-nav">
+                <button class="help-nav-btn active" data-section="overview">
+                    <i class="fas fa-info-circle"></i> Обзор
+                </button>
+                <button class="help-nav-btn" data-section="machines">
+                    <i class="fas fa-industry"></i> Оборудование
+                </button>
+                <button class="help-nav-btn" data-section="types">
+                    <i class="fas fa-tools"></i> Виды ТО
+                </button>
+                <button class="help-nav-btn" data-section="schedule">
+                    <i class="fas fa-calendar-alt"></i> График ТО
+                </button>
+                <button class="help-nav-btn" data-section="acts">
+                    <i class="fas fa-clipboard-check"></i> Акты ТО
+                </button>
+                <button class="help-nav-btn" data-section="calendar">
+                    <i class="fas fa-calendar-day"></i> Календарь
+                </button>
+                <button class="help-nav-btn" data-section="faq">
+                    <i class="fas fa-question-circle"></i> FAQ
+                </button>
+            </div>
+
+            <!-- Обзор системы -->
+            <div class="help-section active" id="overview">
+                <h2><i class="fas fa-info-circle"></i> Обзор системы</h2>
+
+                <p>Система управления техническим обслуживанием (ТО) предназначена для автоматизации процессов планирования, учета и контроля технического обслуживания промышленного оборудования.</p>
+
+                <h3>Основные возможности:</h3>
+                <ul>
+                    <li><strong>Учет оборудования</strong> — добавление станков с указанием типа, модели, модификации, производителя, года выпуска, серийного и инвентарного номеров</li>
+                    <li><strong>Виды ТО</strong> — настройка типов обслуживания с указанием периодичности в днях</li>
+                    <li><strong>График ТО</strong> — планирование дат проведения обслуживания для каждого станка</li>
+                    <li><strong>Акты ТО</strong> — документирование выполненных работ с указанием инженера</li>
+                    <li><strong>Календарь</strong> — визуальное отображение всех запланированных ТО на месяц</li>
+                    <li><strong>Поиск и фильтрация</strong> — быстрый поиск и фильтрация данных во всех таблицах</li>
+                </ul>
+
+                <div class="info-card tip">
+                    <strong><i class="fas fa-lightbulb"></i> Рекомендуемый порядок работы:</strong>
+                    <ol style="margin: 10px 0 0 20px;">
+                        <li>Добавьте оборудование в разделе "Оборудование"</li>
+                        <li>Создайте виды ТО в разделе "Виды ТО"</li>
+                        <li>Составьте график ТО в разделе "График ТО"</li>
+                        <li>После выполнения ТО создайте акт в разделе "Акты ТО"</li>
+                        <li>Контролируйте сроки через "Календарь ТО"</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Управление оборудованием -->
+            <div class="help-section" id="machines">
+                <h2><i class="fas fa-industry"></i> Управление оборудованием</h2>
+
+                <p>Раздел предназначен для ведения реестра обслуживаемого оборудования. Каждый станок имеет подробную карточку с техническими характеристиками.</p>
+
+                <h3>Поля карточки оборудования:</h3>
+                <table class="field-table">
+                    <thead>
+                    <tr>
+                        <th>Поле</th>
+                        <th>Обязательность</th>
+                        <th>Описание</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Тип оборудования</td>
+                        <td><span class="required">Обязательное</span></td>
+                        <td>Выбирается из справочника типов (Токарный станок, Фрезерный станок, Пресс и т.д.)</td>
+                    </tr>
+                    <tr>
+                        <td>Модель</td>
+                        <td><span class="required">Обязательное</span></td>
+                        <td>Модель станка (например: CTX-500, FV-580, HP-300)</td>
+                    </tr>
+                    <tr>
+                        <td>Модификация</td>
+                        <td><span class="optional">Необязательное</span></td>
+                        <td>Исполнение, поколение или серия (например: 1-е поколение, Усиленная, Серия С). Позволяет различать станки одной модели</td>
+                    </tr>
+                    <tr>
+                        <td>Производитель</td>
+                        <td><span class="required">Обязательное</span></td>
+                        <td>Завод-изготовитель (например: DMG MORI, Haas, СтанкоМаш)</td>
+                    </tr>
+                    <tr>
+                        <td>Год выпуска</td>
+                        <td><span class="optional">Необязательное</span></td>
+                        <td>Год производства станка. Отображается цветом: зеленый — новые (2020+), желтый — средние (2010-2019), серый — старые (до 2010)</td>
+                    </tr>
+                    <tr>
+                        <td>Серийный номер</td>
+                        <td><span class="optional">Необязательное</span></td>
+                        <td>Заводской серийный номер станка</td>
+                    </tr>
+                    <tr>
+                        <td>Инвентарный номер</td>
+                        <td><span class="required">Обязательное</span></td>
+                        <td>Уникальный инвентарный номер в вашей организации</td>
+                    </tr>
+                    <tr>
+                        <td>Дата ввода</td>
+                        <td><span class="required">Обязательное</span></td>
+                        <td>Дата ввода станка в эксплуатацию</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <h3>Поиск и фильтрация:</h3>
+                <ul>
+                    <li><strong>Поиск</strong> — введите текст в поле поиска для фильтрации по всем полям (тип, модель, модификация, производитель, серийный и инвентарный номера)</li>
+                    <li><strong>Фильтр по типу</strong> — выберите тип оборудования из выпадающего списка</li>
+                    <li><strong>Фильтр по году</strong> — фильтрация новых (2020+), средних (2010-2019) или старых (до 2010) станков</li>
+                    <li><strong>Сброс</strong> — кнопка "Сбросить" очищает все фильтры</li>
+                </ul>
+
+                <div class="info-card">
+                    <strong><i class="fas fa-info-circle"></i> Важно:</strong> Инвентарный номер должен быть уникальным. Система не позволит создать два станка с одинаковым инвентарным номером.
+                </div>
+            </div>
+
+            <!-- Виды ТО -->
+            <div class="help-section" id="types">
+                <h2><i class="fas fa-tools"></i> Виды технического обслуживания</h2>
+
+                <p>Справочник видов технического обслуживания с указанием периодичности выполнения.</p>
+
+                <h3>Поля справочника:</h3>
+                <table class="field-table">
+                    <thead>
+                    <tr>
+                        <th>Поле</th>
+                        <th>Описание</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Название</td>
+                        <td>Наименование вида ТО (например: Ежемесячное ТО, Замена масла, Калибровка)</td>
+                    </tr>
+                    <tr>
+                        <td>Интервал (дней)</td>
+                        <td>Периодичность выполнения в днях (от 1 до 365)</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <h3>Категории интервалов:</h3>
+                <ul>
+                    <li><span style="color:#e74c3c;">●</span> <strong>Ежедневные</strong> — 1 день</li>
+                    <li><span style="color:#f39c12;">●</span> <strong>Еженедельные</strong> — 2-7 дней</li>
+                    <li><span style="color:#2980b9;">●</span> <strong>Ежемесячные</strong> — 8-30 дней</li>
+                    <li><span style="color:#8e44ad;">●</span> <strong>Квартальные</strong> — 31-90 дней</li>
+                    <li><span style="color:#27ae60;">●</span> <strong>Годовые</strong> — более 90 дней</li>
+                </ul>
+
+                <div class="info-card tip">
+                    <strong><i class="fas fa-lightbulb"></i> Совет:</strong> При создании акта ТО система автоматически обновляет график: дата последнего ТО становится текущей, а дата следующего ТО рассчитывается как текущая дата + интервал.
+                </div>
+            </div>
+
+            <!-- График ТО -->
+            <div class="help-section" id="schedule">
+                <h2><i class="fas fa-calendar-alt"></i> График технического обслуживания</h2>
+
+                <p>График ТО показывает запланированные даты обслуживания для каждой пары "станок — вид ТО".</p>
+
+                <h3>Как добавить запись в график:</h3>
+                <ol>
+                    <li>Выберите оборудование из выпадающего списка</li>
+                    <li>Выберите вид ТО</li>
+                    <li>Укажите дату последнего выполненного ТО (если было)</li>
+                    <li>Укажите планируемую дату следующего ТО</li>
+                    <li>Нажмите "Сохранить"</li>
+                </ol>
+
+                <h3>Статусы записей:</h3>
+                <ul>
+                    <li><span style="color:#e74c3c;">⚠ Просрочено</span> — дата следующего ТО уже прошла</li>
+                    <li><span style="color:#2980b9;">📅 Сегодня</span> — ТО запланировано на сегодня</li>
+                    <li><span style="color:#27ae60;">✓ По графику</span> — ТО запланировано на будущую дату</li>
+                </ul>
+
+                <div class="info-card warning">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Внимание:</strong> При создании акта ТО график обновляется автоматически — дата последнего ТО становится датой из акта, а следующая дата рассчитывается с учетом интервала.
+                </div>
+            </div>
+
+            <!-- Акты ТО -->
+            <div class="help-section" id="acts">
+                <h2><i class="fas fa-clipboard-check"></i> Акты технического обслуживания</h2>
+
+                <p>Акты ТО фиксируют факт выполнения технического обслуживания с указанием исполнителя и результатов.</p>
+
+                <h3>Поля акта ТО:</h3>
+                <table class="field-table">
+                    <thead>
+                    <tr>
+                        <th>Поле</th>
+                        <th>Описание</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Оборудование</td>
+                        <td>Станок, на котором проводилось ТО</td>
+                    </tr>
+                    <tr>
+                        <td>Вид ТО</td>
+                        <td>Тип выполненного обслуживания</td>
+                    </tr>
+                    <tr>
+                        <td>Дата выполнения</td>
+                        <td>Дата проведения работ</td>
+                    </tr>
+                    <tr>
+                        <td>Инженер</td>
+                        <td>ФИО специалиста, выполнившего ТО</td>
+                    </tr>
+                    <tr>
+                        <td>Примечания</td>
+                        <td>Дополнительная информация о выполненной работе</td>
+                    </tr>
+                    <tr>
+                        <td>Акт подписан</td>
+                        <td>Отметка о подписании акта (чекбокс с иконкой подписи)</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-card">
+                    <strong><i class="fas fa-sync-alt"></i> Автоматическое обновление графика:</strong> При создании акта ТО система автоматически обновляет график — устанавливает дату последнего ТО и рассчитывает следующую дату.
+                </div>
+            </div>
+
+            <!-- Календарь -->
+            <div class="help-section" id="calendar">
+                <h2><i class="fas fa-calendar-day"></i> Календарь ТО</h2>
+
+                <p>Календарь отображает все запланированные ТО на выбранный месяц в наглядном виде.</p>
+
+                <h3>Навигация:</h3>
+                <ul>
+                    <li>Стрелки <i class="fas fa-chevron-left"></i> <i class="fas fa-chevron-right"></i> — переключение между месяцами</li>
+                    <li>Кнопка "Сегодня" — возврат к текущему месяцу</li>
+                </ul>
+
+                <h3>Цветовые обозначения:</h3>
+                <ul>
+                    <li><strong>Белый</strong> — обычный день</li>
+                    <li><strong>Желтый фон</strong> — день с запланированными ТО</li>
+                    <li><strong>Синяя рамка</strong> — сегодняшний день</li>
+                    <li><strong>Серый</strong> — дни другого месяца</li>
+                </ul>
+
+                <h3>Просроченные ТО:</h3>
+                <p>Под календарем отображается таблица просроченных ТО с указанием количества дней просрочки.</p>
+            </div>
+
+            <!-- FAQ -->
+            <div class="help-section" id="faq">
+                <h2><i class="fas fa-question-circle"></i> Часто задаваемые вопросы</h2>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        <span>Как добавить новое оборудование?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Перейдите в раздел "Оборудование", заполните форму в верхней части страницы: выберите тип, укажите модель, производителя, при необходимости — модификацию и год выпуска, введите серийный и инвентарный номера, укажите дату ввода в эксплуатацию. Нажмите "Сохранить".</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        <span>Чем отличается модель от модификации?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p><strong>Модель</strong> — это базовая марка станка (например, CTX-500). <strong>Модификация</strong> — это конкретное исполнение или поколение этой модели (например, "1-е поколение" 2003 года выпуска и "3-е поколение" 2024 года — это разные модификации одной модели CTX-500).</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        <span>Как работает автоматическое обновление графика ТО?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>При создании акта ТО система автоматически находит запись в графике для этой пары "станок — вид ТО" и обновляет её: устанавливает дату последнего ТО равной дате из акта, а дату следующего ТО рассчитывает как дата акта + интервал из справочника видов ТО.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        <span>Как найти нужный станок в таблице?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Используйте поле поиска над таблицей. Поиск работает по всем полям: типу, модели, модификации, производителю, серийному и инвентарному номерам. Также можно использовать фильтры по типу оборудования и году выпуска. Горячие клавиши: <kbd>Ctrl+F</kbd> — фокус на поиск, <kbd>Esc</kbd> — сброс фильтров.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        <span>Что означают цвета года выпуска?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Цвет бейджа года выпуска показывает возраст станка:</p>
+                        <ul>
+                            <li><span style="background:#f0fff4;color:#27ae60;padding:2px 8px;border-radius:10px;">Зеленый</span> — новые станки (2020 год и новее)</li>
+                            <li><span style="background:#fff9db;color:#f39c12;padding:2px 8px;border-radius:10px;">Желтый</span> — средний возраст (2010-2019 годы)</li>
+                            <li><span style="background:#f8f9fa;color:#7f8c8d;padding:2px 8px;border-radius:10px;">Серый</span> — старые станки (до 2010 года)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                        <span>Какие горячие клавиши есть в системе?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="shortcut-grid">
+                            <div class="shortcut-item">
+                                <div class="shortcut-key">Ctrl + F</div>
+                                <div style="font-size:14px;color:#555;">Поиск в таблице</div>
+                            </div>
+                            <div class="shortcut-item">
+                                <div class="shortcut-key">Esc</div>
+                                <div style="font-size:14px;color:#555;">Сбросить все фильтры</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="bottom-nav" style="display:none;">
+    <div class="nav-grid">
+        <a href="/"><i class="fas fa-home"></i><span>Главная</span></a>
+        <a href="/machines"><i class="fas fa-industry"></i><span>Оборуд.</span></a>
+        <a href="/maintenance-types"><i class="fas fa-tools"></i><span>Виды ТО</span></a>
+        <a href="/schedule"><i class="fas fa-calendar-alt"></i><span>График</span></a>
+        <a href="/calendar"><i class="fas fa-calendar-day"></i><span>Календарь</span></a>
+        <a href="/help" class="active"><i class="fas fa-question-circle"></i><span>Справка</span></a>
+    </div>
+</div>
+
+<script>
+    // Навигация по разделам
+    document.querySelectorAll('.help-nav-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.help-nav-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            const sectionId = this.dataset.section;
+            document.querySelectorAll('.help-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+        });
+    });
+
+    // Поиск по справке
+    document.getElementById('helpSearch').addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        const sections = document.querySelectorAll('.help-section');
+
+        if (query === '') {
+            sections.forEach(s => s.style.display = '');
+            document.querySelector('.help-section.active')?.classList.add('active');
+            return;
+        }
+
+        sections.forEach(section => {
+            const text = section.textContent.toLowerCase();
+            section.style.display = text.includes(query) ? '' : 'none';
+        });
+    });
+</script>
+</body>
+</html>

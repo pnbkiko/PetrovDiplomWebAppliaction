@@ -1,0 +1,289 @@
+<!-- src/main/resources/templates/schedule.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>График ТО | Система ТО</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/buttons.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .content-vertical { display: flex; flex-direction: column; gap: 20px; }
+        .search-filter-bar {
+            background: white; padding: 15px 20px; border-radius: 12px;
+            margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .search-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+        .search-box { flex: 1; min-width: 200px; position: relative; }
+        .search-box input {
+            width: 100%; padding: 12px 15px 12px 45px;
+            border: 2px solid #e9ecef; border-radius: 10px; font-size: 14px;
+        }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #7f8c8d; }
+        .filter-select {
+            padding: 12px 15px; border: 2px solid #e9ecef;
+            border-radius: 10px; font-size: 14px; background: white;
+            min-width: 180px; cursor: pointer;
+        }
+        .results-count {
+            background: #2ecc71; color: white; padding: 8px 15px;
+            border-radius: 20px; font-size: 13px; font-weight: 600;
+        }
+        .clear-filters {
+            padding: 10px 15px; background: #f0f2f5; border: none;
+            border-radius: 8px; cursor: pointer; color: #7f8c8d;
+            font-size: 13px; display: flex; align-items: center; gap: 5px;
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .status-badge {
+            display: inline-block; padding: 4px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 600;
+        }
+        .status-overdue { background: #ffe0e0; color: #e74c3c; }
+        .status-today { background: #d4edff; color: #2980b9; }
+        .status-future { background: #d5f5e3; color: #27ae60; }
+        .no-results { text-align: center; padding: 30px; color: #7f8c8d; }
+
+        .sidebar {
+            width: 250px; background: white; padding: 20px 0;
+            position: fixed; height: 100vh; overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column;
+        }
+        .nav-menu { list-style: none; padding: 0 10px; flex: 1; }
+        .nav-menu li { margin-bottom: 5px; }
+        .nav-menu a {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 15px; color: #212529; text-decoration: none;
+            border-radius: 8px; transition: all 0.3s; font-weight: 500;
+        }
+        .nav-menu a:hover { background: #f0f2ff; color: #4361ee; }
+        .nav-menu a.active { background: #4361ee; color: white; }
+
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .search-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="sidebar">
+        <h2><i class="fas fa-cogs"></i> Управление ТО</h2>
+        <div style="padding: 15px 20px; border-bottom: 1px solid #e9ecef; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 40px; height: 40px; background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <div style="font-size: 14px; font-weight: 600; color: #2c3e50;" sec:authentication="name">user</div>
+                    <div style="font-size: 11px; color: #7f8c8d;">
+                        <span sec:authorize="hasRole('ROLE_ADMIN')">👑 Администратор</span>
+                        <span sec:authorize="hasRole('ROLE_ENGINEER')">🔧 Инженер</span>
+                        <span sec:authorize="hasRole('ROLE_OPERATOR')">👁️ Оператор</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li><a href="/"><i class="fas fa-home"></i> Главная</a></li>
+            <li><a href="/machines"><i class="fas fa-industry"></i> Оборудование</a></li>
+            <li><a href="/maintenance-types"><i class="fas fa-tools"></i> Виды ТО</a></li>
+            <li><a class="active" href="/schedule"><i class="fas fa-calendar-alt"></i> График ТО</a></li>
+            <li><a href="/maintenance-acts"><i class="fas fa-clipboard-check"></i> Акты ТО</a></li>
+            <li><a href="/calendar"><i class="fas fa-calendar-day"></i> Календарь ТО</a></li>
+            <li><a href="/help"><i class="fas fa-question-circle"></i> Справка</a></li>
+        </ul>
+        <div style="padding: 20px; border-top: 1px solid #e9ecef;">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" style="width: 100%; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <h1><i class="fas fa-calendar-alt"></i> График технического обслуживания</h1>
+        </header>
+
+        <div class="content-vertical">
+            <!-- Форма (ADMIN и ENGINEER) -->
+            <div class="card" sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_ENGINEER')">
+                <h2><i class="fas fa-plus-circle"></i> Добавить запись в график</h2>
+                <form th:action="@{/schedule/add}" method="post">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Оборудование</label>
+                            <select name="machineId" required>
+                                <option value="">Выберите оборудование</option>
+                                <option th:each="m : ${machines}" th:value="${m.id}"
+                                        th:text="${m.model + ' (' + m.invNumber + ')'}"></option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Вид ТО</label>
+                            <select name="typeId" required>
+                                <option value="">Выберите вид ТО</option>
+                                <option th:each="t : ${types}" th:value="${t.id}" th:text="${t.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Дата последнего ТО</label>
+                            <input type="date" name="lastDone">
+                        </div>
+                        <div class="form-group">
+                            <label>Дата следующего ТО</label>
+                            <input type="date" name="nextDue" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">
+                        <i class="fas fa-save"></i> Сохранить
+                    </button>
+                </form>
+            </div>
+
+            <!-- Список графика -->
+            <div class="card">
+                <h2><i class="fas fa-list"></i> Записи графика ТО</h2>
+
+                <div class="search-filter-bar">
+                    <div class="search-row">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchInput" placeholder="Поиск...">
+                        </div>
+                        <select class="filter-select" id="statusFilter">
+                            <option value="">Все статусы</option>
+                            <option value="overdue">Просроченные</option>
+                            <option value="today">На сегодня</option>
+                            <option value="future">Будущие</option>
+                        </select>
+                        <span class="results-count">
+                            Всего: <strong th:text="${schedules != null ? schedules.size() : 0}">0</strong>
+                        </span>
+                        <button class="clear-filters" id="clearFilters">
+                            <i class="fas fa-times"></i> Сбросить
+                        </button>
+                    </div>
+                </div>
+
+                <div th:if="${schedules == null or schedules.empty}" class="no-results">
+                    <i class="fas fa-calendar-alt fa-3x" style="margin-bottom: 15px; opacity: 0.3;"></i>
+                    <p>Записи в графике отсутствуют</p>
+                </div>
+
+                <div th:if="${schedules != null and not schedules.empty}" style="overflow-x: auto;">
+                    <table class="data-table" id="schedulesTable">
+                        <thead>
+                        <tr>
+                            <th>Оборудование</th>
+                            <th>Вид ТО</th>
+                            <th>Последнее ТО</th>
+                            <th>Следующее ТО</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                        </thead>
+                        <tbody id="schedulesTableBody">
+                        <tr th:each="s : ${schedules}">
+                            <td>
+                                <strong th:text="${s.machine?.model}">Модель</strong>
+                                <br><small th:text="${s.machine?.invNumber}">INV</small>
+                            </td>
+                            <td th:text="${s.maintenanceType?.name}">ТО</td>
+                            <td th:text="${s.lastDone != null ? s.lastDone : '—'}">-</td>
+                            <td th:text="${s.nextDue}">2024-01-01</td>
+                            <td>
+                                <span th:if="${s.nextDue != null and s.nextDue < T(java.time.LocalDate).now()}"
+                                      class="status-badge status-overdue">⚠ Просрочено</span>
+                                <span th:if="${s.nextDue != null and s.nextDue == T(java.time.LocalDate).now()}"
+                                      class="status-badge status-today">📅 Сегодня</span>
+                                <span th:if="${s.nextDue != null and s.nextDue > T(java.time.LocalDate).now()}"
+                                      class="status-badge status-future">✓ По графику</span>
+                            </td>
+                            <td>
+                                <form sec:authorize="hasRole('ROLE_ADMIN')"
+                                      th:action="@{/schedule/delete}"
+                                      method="post" style="display:inline;">
+                                    <input type="hidden" name="machineId" th:value="${s.machine?.id}">
+                                    <input type="hidden" name="typeId" th:value="${s.maintenanceType?.id}">
+                                    <button type="submit" class="btn-delete-sm" onclick="return confirm('Удалить?')">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                                <span sec:authorize="!hasRole('ROLE_ADMIN')" style="color:#bdc3c7;font-size:12px;">
+                                    <i class="fas fa-lock"></i>
+                                    Нет прав
+                                </span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="bottom-nav" style="display:none;">
+    <div class="nav-grid">
+        <a href="/"><i class="fas fa-home"></i><span>Главная</span></a>
+        <a href="/machines"><i class="fas fa-industry"></i><span>Оборуд.</span></a>
+        <a href="/maintenance-types"><i class="fas fa-tools"></i><span>Виды ТО</span></a>
+        <a href="/schedule" class="active"><i class="fas fa-calendar-alt"></i><span>График</span></a>
+        <a href="/calendar"><i class="fas fa-calendar-day"></i><span>Календарь</span></a>
+        <a href="/help"><i class="fas fa-question-circle"></i><span>Справка</span></a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const clearFilters = document.getElementById('clearFilters');
+        const tableBody = document.getElementById('schedulesTableBody');
+
+        function filterTable() {
+            if (!tableBody) return;
+            const searchTerm = (searchInput?.value || '').toLowerCase();
+            const filter = statusFilter?.value || '';
+            const rows = tableBody.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const isOverdue = text.includes('просрочено');
+                const isToday = text.includes('сегодня');
+                const isFuture = text.includes('по графику');
+
+                const matchesSearch = searchTerm === '' || text.includes(searchTerm);
+                let matchesStatus = true;
+                if (filter === 'overdue') matchesStatus = isOverdue;
+                if (filter === 'today') matchesStatus = isToday;
+                if (filter === 'future') matchesStatus = isFuture;
+
+                row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+            });
+        }
+
+        if (searchInput) searchInput.addEventListener('input', filterTable);
+        if (statusFilter) statusFilter.addEventListener('change', filterTable);
+        if (clearFilters) clearFilters.addEventListener('click', function() {
+            if (searchInput) searchInput.value = '';
+            if (statusFilter) statusFilter.value = '';
+            filterTable();
+        });
+
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+        const today = new Date().toISOString().split('T')[0];
+        dateInputs.forEach(input => {
+            if (!input.value) input.value = today;
+        });
+    });
+</script>
+</body>
+</html>
